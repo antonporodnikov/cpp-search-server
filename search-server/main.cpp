@@ -60,9 +60,8 @@ public:
     void AddDocument(int document_id, const string& document) {
         const vector<string> words = SplitIntoWordsNoStop(document);
         for (const string& word : words) {
-            const double word_amount = count(words.begin(), words.end(), word);
-            const double tf = word_amount / words.size();
-            word_to_documents_[word].insert({document_id, tf});
+            const double word_weight = 1.0 / words.size();
+            word_to_documents_[word][document_id] += word_weight;
         }
         ++document_count_;
     }
