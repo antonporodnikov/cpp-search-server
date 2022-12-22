@@ -277,50 +277,50 @@ void PrintDocument(const Document& document) {
 // Реализация макросов ASSERT, ASSERT_EQUAL, ASSERT_EQUAL_HINT, ASSERT_HINT и RUN_TEST
 template <typename Container>
 void PrintContainer(ostream& out, const Container& container) {
-	int first_element_check = 1;
+    int first_element_check = 1;
 
-	for (const auto& element : container) {
-		if (first_element_check) {
-			out << element;
-			first_element_check -= 1;
-		} else {
-			out << ", "s << element;
-		}
-	}
+    for (const auto& element : container) {
+        if (first_element_check) {
+            out << element;
+            first_element_check -= 1;
+        } else {
+            out << ", "s << element;
+        }
+    }
 }
 
 void PrintDocumentStatus(ostream& out, const DocumentStatus& status) {
-	switch (status) {
-	case DocumentStatus::ACTUAL:
-		out << "DocumentStatus::ACTUAL";
-		break;
-	case DocumentStatus::IRRELEVANT:
-		out << "DocumentStatus::IRRELEVANT";
-		break;
-	case DocumentStatus::BANNED:
-		out << "DocumentStatus::BANNED";
-		break;
-	case DocumentStatus::REMOVED:
-		out << "DocumentStatus::REMOVED";
-		break;
-	default:
-		out << "Unknown DocumentStatus";
-	}
+    switch (status) {
+    case DocumentStatus::ACTUAL:
+        out << "DocumentStatus::ACTUAL";
+        break;
+    case DocumentStatus::IRRELEVANT:
+        out << "DocumentStatus::IRRELEVANT";
+        break;
+    case DocumentStatus::BANNED:
+        out << "DocumentStatus::BANNED";
+        break;
+    case DocumentStatus::REMOVED:
+        out << "DocumentStatus::REMOVED";
+        break;
+    default:
+        out << "Unknown DocumentStatus";
+    }
 }
 
 template <typename Element>
 ostream& operator<<(ostream& out, const vector<Element>& container) {
-	out << "["s;
-	PrintContainer(out, container);
-	out << "]"s;
-	return out;
+    out << "["s;
+    PrintContainer(out, container);
+    out << "]"s;
+    return out;
 }
 
 ostream& operator<<(ostream& out, const DocumentStatus& status) {
-	out << "["s;
-	PrintDocumentStatus(out, status);
-	out << "]"s;
-	return out;
+    out << "["s;
+    PrintDocumentStatus(out, status);
+    out << "]"s;
+    return out;
 }
 
 template <typename Function>
@@ -335,8 +335,8 @@ void RunTestImpl(const Function& test_func, const string& test_func_str) {
 template <typename T, typename U>
 void AssertEqualImpl(const T& t, const U& u, const string& t_str, const string& u_str,
                      const string& file, const string& func, unsigned line, const string& hint) {
-	if (t != u) {
-		cout << boolalpha;
+    if (t != u) {
+        cout << boolalpha;
         cout << file << "("s << line << "): "s << func << ": "s;
         cout << "ASSERT_EQUAL("s << t_str << ", "s << u_str << ") failed: "s;
         cout << t << " != "s << u << "."s;
@@ -347,7 +347,7 @@ void AssertEqualImpl(const T& t, const U& u, const string& t_str, const string& 
 
         cout << endl;
         abort();
-	}
+    }
 }
 
 #define ASSERT_EQUAL(a, b) AssertEqualImpl((a), (b), #a, #b, __FILE__, __FUNCTION__, __LINE__, ""s)
