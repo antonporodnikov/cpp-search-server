@@ -336,16 +336,16 @@ template <typename T, typename U>
 void AssertEqualImpl(const T& t, const U& u, const string& t_str, const string& u_str,
                      const string& file, const string& func, unsigned line, const string& hint) {
     if (t != u) {
-        cout << boolalpha;
-        cout << file << "("s << line << "): "s << func << ": "s;
-        cout << "ASSERT_EQUAL("s << t_str << ", "s << u_str << ") failed: "s;
-        cout << t << " != "s << u << "."s;
+        cerr << boolalpha;
+        cerr << file << "("s << line << "): "s << func << ": "s;
+        cerr << "ASSERT_EQUAL("s << t_str << ", "s << u_str << ") failed: "s;
+        cerr << t << " != "s << u << "."s;
 
         if (!hint.empty()) {
-            cout << " Hint: "s << hint;
+            cerr << " Hint: "s << hint;
         }
 
-        cout << endl;
+        cerr << endl;
         abort();
     }
 }
@@ -357,14 +357,14 @@ void AssertEqualImpl(const T& t, const U& u, const string& t_str, const string& 
 void AssertImpl(bool value, const string& expr_str, const string& file, const string& func, unsigned line,
                 const string& hint) {
     if (!value) {
-        cout << file << "("s << line << "): "s << func << ": "s;
-        cout << "ASSERT("s << expr_str << ") failed."s;
+        cerr << file << "("s << line << "): "s << func << ": "s;
+        cerr << "ASSERT("s << expr_str << ") failed."s;
 
         if (!hint.empty()) {
-            cout << " Hint: "s << hint;
+            cerr << " Hint: "s << hint;
         }
 
-        cout << endl;
+        cerr << endl;
         abort();
     }
 }
@@ -402,250 +402,250 @@ void TestExcludeStopWordsFromAddedDocumentContent() {
 // Тест проверяет, что добавленный документ находтся по посковому запросу,
 // который содержит слова из документа
 void TestSearchingAddDocument() {
-	const int doc_id = 42;
-	const string content = "cat in the city"s;
-	const vector<int> ratings = {1, 2, 3};
+    const int doc_id = 42;
+    const string content = "cat in the city"s;
+    const vector<int> ratings = {1, 2, 3};
 
-	{
-		SearchServer server;
+    {
+        SearchServer server;
         server.AddDocument(doc_id, content, DocumentStatus::ACTUAL, ratings);
-		const auto found_docs = server.FindTopDocuments("Birds and one cat in the town"s);
-		ASSERT_EQUAL_HINT(found_docs.size(), 1u,
-				  "In this case, the function should return one document"s);
-		const Document& doc0 = found_docs[0];
-		ASSERT_EQUAL(doc0.id, doc_id);
-	}
+        const auto found_docs = server.FindTopDocuments("Birds and one cat in the town"s);
+        ASSERT_EQUAL_HINT(found_docs.size(), 1u,
+                          "In this case, the function should return one document"s);
+        const Document& doc0 = found_docs[0];
+        ASSERT_EQUAL(doc0.id, doc_id);
+    }
 
-	{
-		SearchServer server;
+    {
+        SearchServer server;
         server.AddDocument(doc_id, content, DocumentStatus::ACTUAL, ratings);
-		ASSERT_HINT(server.FindTopDocuments("Birds and one dog are there"s).empty(),
-		            "A query that does not contain word(s) from the document should not push it"s);
-	}
+        ASSERT_HINT(server.FindTopDocuments("Birds and one dog are there"s).empty(),
+                    "A query that does not contain word(s) from the document should not push it"s);
+    }
 }
 
 // Тест проверяет, исключаются ли стоп-слова из текста документа
 void TestDocumentsWithMinusWordsNotInResult() {
-	const int doc_id = 42;
-	const string content = "cat in the city"s;
-	const vector<int> ratings = {1, 2, 3};
+    const int doc_id = 42;
+    const string content = "cat in the city"s;
+    const vector<int> ratings = {1, 2, 3};
 
-	{
-		SearchServer server;
+    {
+        SearchServer server;
         server.AddDocument(doc_id, content, DocumentStatus::ACTUAL, ratings);
-		ASSERT_HINT(server.FindTopDocuments("dogs in the -city"s).empty(),
-		            "A query that contains minus-word from the document should not push it"s);
-	}
+        ASSERT_HINT(server.FindTopDocuments("dogs in the -city"s).empty(),
+                    "A query that contains minus-word from the document should not push it"s);
+    }
 
-	{
-		SearchServer server;
+    {
+        SearchServer server;
         server.AddDocument(doc_id, content, DocumentStatus::ACTUAL, ratings);
-		const auto found_docs = server.FindTopDocuments("dogs in the city -town"s);
-		ASSERT_EQUAL(found_docs.size(), 1u);
-		const Document& doc0 = found_docs[0];
-		ASSERT_EQUAL(doc0.id, doc_id);
-	}
+        const auto found_docs = server.FindTopDocuments("dogs in the city -town"s);
+        ASSERT_EQUAL(found_docs.size(), 1u);
+        const Document& doc0 = found_docs[0];
+        ASSERT_EQUAL(doc0.id, doc_id);
+    }
 }
 
 // Тест проверяет, ссответствуют ли документы поисковому запросу;
 // должны возвращаться все слова из поискового запроса;
 // при соответствии по минус-слову, должен возвращаться пустой список
 void TestDocumentsMatching() {
-	const int doc_id = 42;
-	const string content = "cat in the city"s;
-	const vector<int> ratings = {1, 2, 3};
+    const int doc_id = 42;
+    const string content = "cat in the city"s;
+    const vector<int> ratings = {1, 2, 3};
 
-	{
-		SearchServer server;
+    {
+        SearchServer server;
         server.AddDocument(doc_id, content, DocumentStatus::ACTUAL, ratings);
         const auto matching_doc = server.MatchDocument("big cat and dog in the city"s, doc_id);
-		vector<string> content_words = SplitIntoWords(content);
-		vector<string> matching_words = get<0>(matching_doc);
-		sort(content_words.begin(), content_words.end());
-		sort(matching_words.begin(), matching_words.end());
-		ASSERT_EQUAL(content_words, matching_words);
+        vector<string> content_words = SplitIntoWords(content);
+        vector<string> matching_words = get<0>(matching_doc);
+        sort(content_words.begin(), content_words.end());
+        sort(matching_words.begin(), matching_words.end());
+        ASSERT_EQUAL(content_words, matching_words);
 
-		const DocumentStatus matching_doc_status = get<1>(matching_doc);
+        const DocumentStatus matching_doc_status = get<1>(matching_doc);
         ASSERT_EQUAL(matching_doc_status, DocumentStatus::ACTUAL);
-	}
+    }
 
-	{
-		SearchServer server;
+    {
+        SearchServer server;
         server.AddDocument(doc_id, content, DocumentStatus::ACTUAL, ratings);
         const auto matching_doc = server.MatchDocument("big dog in the city -cat"s, doc_id);
-		const vector<string> matching_words = get<0>(matching_doc);
-		ASSERT_HINT(matching_words.empty(),
-                            "There is a match for minus-word, vector matching_words should be empty"s);
-	}
+        const vector<string> matching_words = get<0>(matching_doc);
+        ASSERT_HINT(matching_words.empty(),
+                    "There is a match for minus-word, vector matching_words should be empty"s);
+    }
 }
 
 // Тест проверяет сортировку документов по релевантности,
 // результаты должны быть отсортированы в порядке убывания
 void TestRelevanceSorting() {
-	const DocumentStatus status = DocumentStatus::ACTUAL;
+    const DocumentStatus status = DocumentStatus::ACTUAL;
 
-	{
-		SearchServer server;
-		// Релевантность документа 0.173287
-		server.AddDocument(0, "fluffy cat beautiful dog"s, status, {8, -3});
-		// Релевантность документа 0.866434
-		server.AddDocument(1, "angry cat angry dog"s, status, {7, 2, 7});
-		// Релевантность документа 0.462098
-		server.AddDocument(2, "dog pretty eyes"s, status, {5, -12, 2, 1});
-		// Релевантность документа 0.693147
-		server.AddDocument(3, "crazy bird"s, status, {9});
-		const auto found_docs = server.FindTopDocuments("angry crazy cat with eyes"s);
-		ASSERT_HINT(found_docs[0].relevance >= found_docs[1].relevance &&
-                            found_docs[1].relevance >= found_docs[2].relevance &&
-                            found_docs[2].relevance >= found_docs[3].relevance,
-                            "Sorting by relevance is not correct, sorting should be in descending order"s);
-	}
+    {
+        SearchServer server;
+        // Релевантность документа 0.173287
+        server.AddDocument(0, "fluffy cat beautiful dog"s, status, {8, -3});
+        // Релевантность документа 0.866434
+        server.AddDocument(1, "angry cat angry dog"s, status, {7, 2, 7});
+        // Релевантность документа 0.462098
+        server.AddDocument(2, "dog pretty eyes"s, status, {5, -12, 2, 1});
+        // Релевантность документа 0.693147
+        server.AddDocument(3, "crazy bird"s, status, {9});
+        const auto found_docs = server.FindTopDocuments("angry crazy cat with eyes"s);
+        ASSERT_HINT(found_docs[0].relevance >= found_docs[1].relevance &&
+                    found_docs[1].relevance >= found_docs[2].relevance &&
+                    found_docs[2].relevance >= found_docs[3].relevance,
+                    "Sorting by relevance is not correct, sorting should be in descending order"s);
+    }
 }
 
 // Тест проверяет расчет рэйтинга документов,
 // рэйтинг равен среднему арифметическому оценок документа
 void TestDocumentsRatingCalc() {
-	const int doc_id = 42;
-	const string content = "cat in the city"s;
-	const DocumentStatus status = DocumentStatus::ACTUAL;
+    const int doc_id = 42;
+    const string content = "cat in the city"s;
+    const DocumentStatus status = DocumentStatus::ACTUAL;
 
-	{
-		SearchServer server;
-		server.AddDocument(doc_id, content, status, {});
-		const auto found_docs = server.FindTopDocuments("cat"s);
-		ASSERT_EQUAL_HINT(found_docs[0].rating, 0,
-				  "In this case, the expected rating is 0");
-	}
+    {
+        SearchServer server;
+        server.AddDocument(doc_id, content, status, {});
+        const auto found_docs = server.FindTopDocuments("cat"s);
+        ASSERT_EQUAL_HINT(found_docs[0].rating, 0,
+                          "In this case, the expected rating is 0");
+    }
 
-	{
-		SearchServer server;
-		server.AddDocument(doc_id, content, status, {7, 2, 7});
-		const auto found_docs = server.FindTopDocuments("cat"s);
-		// (7 + 2 + 7) / 3 = 5.(3) ~ отбрасываем дробную часть
-		ASSERT_EQUAL_HINT(found_docs[0].rating, 5,
-                                  "In this case, the expected rating is 5");
-	}
+    {
+        SearchServer server;
+        server.AddDocument(doc_id, content, status, {7, 2, 7});
+        const auto found_docs = server.FindTopDocuments("cat"s);
+        // (7 + 2 + 7) / 3 = 5.(3) ~ отбрасываем дробную часть
+        ASSERT_EQUAL_HINT(found_docs[0].rating, 5,
+                          "In this case, the expected rating is 5");
+    }
 
-	{
-		SearchServer server;
-		server.AddDocument(doc_id, content, status, {-12, -20, 3});
-		const auto found_docs = server.FindTopDocuments("cat"s);
-		// (-12 - 20 + 3) / 3 = -9.(6) ~ отбрасываем дробную часть
-		ASSERT_EQUAL_HINT(found_docs[0].rating, -9,
-                                  "In this case, the expected rating is -9");
-	}
+    {
+        SearchServer server;
+        server.AddDocument(doc_id, content, status, {-12, -20, 3});
+        const auto found_docs = server.FindTopDocuments("cat"s);
+        // (-12 - 20 + 3) / 3 = -9.(6) ~ отбрасываем дробную часть
+        ASSERT_EQUAL_HINT(found_docs[0].rating, -9,
+                          "In this case, the expected rating is -9");
+    }
 }
 
 // Тест проверяет фильтрацию результатов с использованием предиката
 void TestPredicatFucntionInFindTopDocuments() {
-	{
-		SearchServer server;
-		server.AddDocument(0, "fluffy cat beautiful dog"s, DocumentStatus::ACTUAL, {8, -3});
-		server.AddDocument(1, "angry cat angry dog"s, DocumentStatus::ACTUAL, {7, 2, 7});
-		server.AddDocument(2, "dog pretty eyes"s, DocumentStatus::ACTUAL, {5, -12, 2, 1});
-		server.AddDocument(3, "crazy bird"s, DocumentStatus::ACTUAL, {9});
-		const auto found_docs = server.FindTopDocuments("angry crazy cat with eyes"s,
-                        [](int document_id, DocumentStatus status, int rating) {
-                            return document_id % 2 == 0; });
-		ASSERT_EQUAL_HINT(found_docs.size(), 2u, 
-                                  "In this case, the size of the found_docs should be equal to 2"s);
-		ASSERT_EQUAL_HINT(found_docs[0].id, 2, 
-                                  "In this case, first document id should be equal to 2"s);
-		ASSERT_EQUAL_HINT(found_docs[1].id, 0,
-                                  "In this case, second document id should be equal to 0"s);
-	}
+    {
+        SearchServer server;
+        server.AddDocument(0, "fluffy cat beautiful dog"s, DocumentStatus::ACTUAL, {8, -3});
+        server.AddDocument(1, "angry cat angry dog"s, DocumentStatus::ACTUAL, {7, 2, 7});
+        server.AddDocument(2, "dog pretty eyes"s, DocumentStatus::ACTUAL, {5, -12, 2, 1});
+        server.AddDocument(3, "crazy bird"s, DocumentStatus::ACTUAL, {9});
+        const auto found_docs = server.FindTopDocuments("angry crazy cat with eyes"s,
+                [](int document_id, DocumentStatus status, int rating) {
+                    return document_id % 2 == 0; });
+        ASSERT_EQUAL_HINT(found_docs.size(), 2u, 
+                          "In this case, the size of the found_docs should be equal to 2"s);
+        ASSERT_EQUAL_HINT(found_docs[0].id, 2, 
+                          "In this case, first document id should be equal to 2"s);
+        ASSERT_EQUAL_HINT(found_docs[1].id, 0,
+                          "In this case, second document id should be equal to 0"s);
+    }
 
-	{
-		SearchServer server;
-		server.AddDocument(0, "fluffy cat beautiful dog"s, DocumentStatus::ACTUAL, {8, -3});
-		server.AddDocument(1, "angry cat angry dog"s, DocumentStatus::ACTUAL, {7, 2, 7});
-		server.AddDocument(2, "dog pretty eyes"s, DocumentStatus::ACTUAL, {5, -12, 2, 1});
-		server.AddDocument(3, "crazy bird"s, DocumentStatus::ACTUAL, {9});
-		const auto found_docs = server.FindTopDocuments("angry crazy cat with eyes"s,
-                        [](int document_id, DocumentStatus status, int rating) {
-                            return document_id < 0; });
-		ASSERT_HINT(found_docs.empty(),
-                            "In this case, found_docs should not contain documents"s);
-	}
+    {
+	SearchServer server;
+	server.AddDocument(0, "fluffy cat beautiful dog"s, DocumentStatus::ACTUAL, {8, -3});
+	server.AddDocument(1, "angry cat angry dog"s, DocumentStatus::ACTUAL, {7, 2, 7});
+	server.AddDocument(2, "dog pretty eyes"s, DocumentStatus::ACTUAL, {5, -12, 2, 1});
+	server.AddDocument(3, "crazy bird"s, DocumentStatus::ACTUAL, {9});
+	const auto found_docs = server.FindTopDocuments("angry crazy cat with eyes"s,
+		[](int document_id, DocumentStatus status, int rating) {
+		    return document_id < 0; });
+	ASSERT_HINT(found_docs.empty(),
+		    "In this case, found_docs should not contain documents"s);
+    }
 
-	{
-		SearchServer server;
-		server.AddDocument(0, "fluffy cat beautiful dog"s, DocumentStatus::ACTUAL, {8, -3});
-		server.AddDocument(1, "angry cat angry dog"s, DocumentStatus::ACTUAL, {7, 2, 7});
-		server.AddDocument(2, "dog pretty eyes"s, DocumentStatus::ACTUAL, {5, -12, 2, 1});
-		server.AddDocument(3, "crazy bird"s, DocumentStatus::ACTUAL, {9});
-		const auto found_docs = server.FindTopDocuments("angry crazy cat with eyes"s,
-		        [](int document_id, DocumentStatus status, int rating) {
-			    return rating < 0; });
-		ASSERT_EQUAL_HINT(found_docs.size(), 1u,
-                                  "in this case, only one document has a rating less than zero"s);
-		ASSERT_EQUAL_HINT(found_docs[0].id, 2,
-                                  "In this case, document's id should be equal to 2"s);
-	}
+    {
+	SearchServer server;
+	server.AddDocument(0, "fluffy cat beautiful dog"s, DocumentStatus::ACTUAL, {8, -3});
+	server.AddDocument(1, "angry cat angry dog"s, DocumentStatus::ACTUAL, {7, 2, 7});
+	server.AddDocument(2, "dog pretty eyes"s, DocumentStatus::ACTUAL, {5, -12, 2, 1});
+	server.AddDocument(3, "crazy bird"s, DocumentStatus::ACTUAL, {9});
+	const auto found_docs = server.FindTopDocuments("angry crazy cat with eyes"s,
+		[](int document_id, DocumentStatus status, int rating) {
+		    return rating < 0; });
+	ASSERT_EQUAL_HINT(found_docs.size(), 1u,
+			  "in this case, only one document has a rating less than zero"s);
+	ASSERT_EQUAL_HINT(found_docs[0].id, 2,
+			  "In this case, document's id should be equal to 2"s);
+    }
 }
 
 // Тест проверяет поиск документов с заданным статусом
 void TestFindTopDocumentsFuncWithStatus() {
-	{
-		SearchServer server;
-		server.AddDocument(0, "fluffy cat beautiful dog"s, DocumentStatus::ACTUAL, {8, -3});
-		server.AddDocument(1, "angry cat angry dog"s, DocumentStatus::IRRELEVANT, {7, 2, 7});
-		server.AddDocument(2, "dog pretty eyes"s, DocumentStatus::BANNED, {5, -12, 2, 1});
-		server.AddDocument(3, "crazy bird"s, DocumentStatus::REMOVED, {9});
-		const auto found_doc_actual = server.FindTopDocuments("angry crazy cat with eyes"s,
-                                                                      DocumentStatus::ACTUAL);
-		ASSERT_EQUAL_HINT(found_doc_actual[0].id, 0,
-						  "Wrong id, expected id is 0"s);
-		ASSERT_EQUAL_HINT(found_doc_actual.size(), 1u,
-						  "There should be one actual status document"s);
+    {
+	SearchServer server;
+	server.AddDocument(0, "fluffy cat beautiful dog"s, DocumentStatus::ACTUAL, {8, -3});
+	server.AddDocument(1, "angry cat angry dog"s, DocumentStatus::IRRELEVANT, {7, 2, 7});
+	server.AddDocument(2, "dog pretty eyes"s, DocumentStatus::BANNED, {5, -12, 2, 1});
+	server.AddDocument(3, "crazy bird"s, DocumentStatus::REMOVED, {9});
+	const auto found_doc_actual = server.FindTopDocuments("angry crazy cat with eyes"s,
+							      DocumentStatus::ACTUAL);
+	ASSERT_EQUAL_HINT(found_doc_actual[0].id, 0,
+                          "Wrong id, expected id is 0"s);
+	ASSERT_EQUAL_HINT(found_doc_actual.size(), 1u,
+                          "There should be one actual status document"s);
 
-		const auto found_doc_irrelevant = server.FindTopDocuments("angry crazy cat with eyes"s,
-                                                                          DocumentStatus::IRRELEVANT);
-		ASSERT_EQUAL_HINT(found_doc_irrelevant[0].id, 1,
-						  "Wrong id, expected id is 1"s);
-		ASSERT_EQUAL_HINT(found_doc_irrelevant.size(), 1u,
-						  "There should be one irrelevant status document"s);
+	const auto found_doc_irrelevant = server.FindTopDocuments("angry crazy cat with eyes"s,
+								  DocumentStatus::IRRELEVANT);
+	ASSERT_EQUAL_HINT(found_doc_irrelevant[0].id, 1,
+                          "Wrong id, expected id is 1"s);
+	ASSERT_EQUAL_HINT(found_doc_irrelevant.size(), 1u,
+                          "There should be one irrelevant status document"s);
 
-		const auto found_doc_banned = server.FindTopDocuments("angry crazy cat with eyes"s,
-                                                                      DocumentStatus::BANNED);
-		ASSERT_EQUAL_HINT(found_doc_banned[0].id, 2,
-						  "Wrong id, expected id is 2"s);
-		ASSERT_EQUAL_HINT(found_doc_banned.size(), 1u,
-						  "There should be one banned status document"s);
+	const auto found_doc_banned = server.FindTopDocuments("angry crazy cat with eyes"s,
+							      DocumentStatus::BANNED);
+	ASSERT_EQUAL_HINT(found_doc_banned[0].id, 2,
+                          "Wrong id, expected id is 2"s);
+	ASSERT_EQUAL_HINT(found_doc_banned.size(), 1u,
+                          "There should be one banned status document"s);
 
-		const auto found_doc_removed = server.FindTopDocuments("angry crazy cat with eyes"s,
-                                                                       DocumentStatus::REMOVED);
-		ASSERT_EQUAL_HINT(found_doc_removed[0].id, 3,
-						  "Wrong id, expected id is 3"s);
-		ASSERT_EQUAL_HINT(found_doc_removed.size(), 1u,
-						  "There should be one removed status document"s);
-	}
+	const auto found_doc_removed = server.FindTopDocuments("angry crazy cat with eyes"s,
+							       DocumentStatus::REMOVED);
+	ASSERT_EQUAL_HINT(found_doc_removed[0].id, 3,
+                          "Wrong id, expected id is 3"s);
+	ASSERT_EQUAL_HINT(found_doc_removed.size(), 1u,
+                          "There should be one removed status document"s);
+    }
 }
 
 // Тест проверяет корректность вычислений релеванстонти документов
 void TestDocumentsRelevanceCalc() {
-	const DocumentStatus status = DocumentStatus::ACTUAL;
+    const DocumentStatus status = DocumentStatus::ACTUAL;
 
-	{
-		SearchServer server;
-		server.AddDocument(0, "fluffy cat beautiful dog"s, status, {8, -3});
-		double id0_doc_relevance = 0.173287;
-		server.AddDocument(1, "angry cat angry dog"s, status, {7, 2, 7});
-		double id1_doc_relevance = 0.866434;
-		server.AddDocument(2, "dog pretty eyes"s, status, {5, -12, 2, 1});
-		double id2_doc_relevance = 0.462098;
-		server.AddDocument(3, "crazy bird"s, status, {9});
-		double id3_doc_relevance = 0.693147;
-		const auto found_docs = server.FindTopDocuments("angry crazy cat with eyes"s);
-		ASSERT_HINT(abs(found_docs[0].relevance - id1_doc_relevance) < EPSILON,
-					"Wrong relevance, should be 0.866434 for this document");
-		ASSERT_HINT(abs(found_docs[1].relevance - id3_doc_relevance) < EPSILON,
-					"Wrong relevance, should be 0.866434 for this document");
-		ASSERT_HINT(abs(found_docs[2].relevance - id2_doc_relevance) < EPSILON,
-					"Wrong relevance, should be 0.866434 for this document");
-		ASSERT_HINT(abs(found_docs[3].relevance - id0_doc_relevance) < EPSILON,
-					"Wrong relevance, should be 0.866434 for this document");
-	}
+    {
+	SearchServer server;
+	server.AddDocument(0, "fluffy cat beautiful dog"s, status, {8, -3});
+	double id0_doc_relevance = 0.173287;
+	server.AddDocument(1, "angry cat angry dog"s, status, {7, 2, 7});
+	double id1_doc_relevance = 0.866434;
+	server.AddDocument(2, "dog pretty eyes"s, status, {5, -12, 2, 1});
+	double id2_doc_relevance = 0.462098;
+	server.AddDocument(3, "crazy bird"s, status, {9});
+	double id3_doc_relevance = 0.693147;
+	const auto found_docs = server.FindTopDocuments("angry crazy cat with eyes"s);
+	ASSERT_HINT(abs(found_docs[0].relevance - id1_doc_relevance) < EPSILON,
+                    "Wrong relevance, should be 0.866434 for this document");
+	ASSERT_HINT(abs(found_docs[1].relevance - id3_doc_relevance) < EPSILON,
+                    "Wrong relevance, should be 0.866434 for this document");
+	ASSERT_HINT(abs(found_docs[2].relevance - id2_doc_relevance) < EPSILON,
+                    "Wrong relevance, should be 0.866434 for this document");
+	ASSERT_HINT(abs(found_docs[3].relevance - id0_doc_relevance) < EPSILON,
+                    "Wrong relevance, should be 0.866434 for this document");
+    }
 }
 
 // Функция TestSearchServer является точкой входа для запуска тестов
@@ -686,7 +686,7 @@ int main() {
     cout << "Even ids:"s << endl;
     for (const Document& document : search_server.FindTopDocuments("пушистый ухоженный кот"s,
             [](int document_id, DocumentStatus status, int rating) {
-    		    return document_id % 2 == 0; })) {
+    	        return document_id % 2 == 0; })) {
         PrintDocument(document);
     }
 
