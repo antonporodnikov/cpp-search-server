@@ -84,10 +84,10 @@ public:
     explicit SearchServer(const StringContainer& stop_words)
         : stop_words_(MakeUniqueNonEmptyStrings(stop_words))
     {
-        for (const string& word : stop_words_) {
-            if (!IsValidWord(word)) {
-                throw invalid_argument("Стоп-слово содерджит недопустимые символы"s);
-            }
+        if (any_of(stop_words_.begin(), stop_words_.end(), [](const string& word) {
+                    return !IsValidWord(word);
+                })) {
+            throw invalid_argument("Стоп-слово содерджит недопустимые символы"s);
         }
     }
 
@@ -121,13 +121,6 @@ public:
     template <typename DocumentPredicate>
     vector<Document> FindTopDocuments(const string& raw_query,
                                         DocumentPredicate document_predicate) const {
-        vector<string> words = SplitIntoWords(raw_query);
-        for (const string& word : words) {
-            if (!IsValidWord(word) || !IsValidMinus(word)) {
-                throw invalid_argument("В словах поискового запроса есть недопустимые символы"s);
-            }
-        }
-
         const Query query = ParseQuery(raw_query);
         auto matched_document = FindAllDocuments(query, document_predicate);
 
@@ -171,13 +164,6 @@ public:
 
     tuple<vector<string>, DocumentStatus> MatchDocument(const string& raw_query,
                                                         int document_id) const {
-        vector<string> words = SplitIntoWords(raw_query);
-        for (const string& word : words) {
-            if (!IsValidWord(word) || !IsValidMinus(word)) {
-                throw invalid_argument("В словах поискового запроса есть недопустимые символы"s);
-            }
-        }
-
         const Query query = ParseQuery(raw_query);
         vector<string> matched_words;
         tuple<vector<string>, DocumentStatus> result;
@@ -284,6 +270,9 @@ private:
     Query ParseQuery(const string& text) const {
         Query query;
         for (const string& word : SplitIntoWords(text)) {
+            if (!IsValidWord(word) || !IsValidMinus(word)) {
+                throw invalid_argument("В словах поискового запроса есть недопустимые символы"s);
+            }
             const QueryWord query_word = ParseQueryWord(word);
             if (!query_word.is_stop) {
                 if (query_word.is_minus) {
