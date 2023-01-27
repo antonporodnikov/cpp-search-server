@@ -252,6 +252,9 @@ private:
     };
 
     QueryWord ParseQueryWord(string text) const {
+        if (!IsValidWord(text) || !IsValidMinus(text)) {
+            throw invalid_argument("В словах поискового запроса есть недопустимые символы"s);
+        }
         bool is_minus = false;
         // Word shouldn't be empty
         if (text[0] == '-') {
@@ -270,9 +273,6 @@ private:
     Query ParseQuery(const string& text) const {
         Query query;
         for (const string& word : SplitIntoWords(text)) {
-            if (!IsValidWord(word) || !IsValidMinus(word)) {
-                throw invalid_argument("В словах поискового запроса есть недопустимые символы"s);
-            }
             const QueryWord query_word = ParseQueryWord(word);
             if (!query_word.is_stop) {
                 if (query_word.is_minus) {
