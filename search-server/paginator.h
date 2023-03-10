@@ -27,6 +27,14 @@ private:
 };
 
 template <typename Iterator>
+std::ostream& operator<<(std::ostream& out, const IteratorRange<Iterator>& range) {
+    for (Iterator it = range.begin(); it != range.end(); ++it) {
+        out << *it;
+    }
+    return out;
+}
+
+template <typename Iterator>
 class Paginator {
 public:
     Paginator(Iterator begin, Iterator end, size_t page_size) {
