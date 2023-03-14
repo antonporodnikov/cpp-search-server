@@ -3,7 +3,7 @@
 using namespace std;
 
 SearchServer::SearchServer(const string& stop_words_text)
-    : SearchServer(SplitIntoWords(stop_words_text))
+    : SearchServer(SplitIntoWords(stop_words_text))  // Invoke delegating constructor from string container
 {
 }
 
@@ -13,7 +13,6 @@ void SearchServer::AddDocument(int document_id, const string& document, Document
         throw std::invalid_argument("Invalid document_id"s);
     }
     const auto words = SplitIntoWordsNoStop(document);
-
     const double inv_word_count = 1.0 / words.size();
     for (const std::string& word : words) {
         word_to_document_freqs_[word][document_id] += inv_word_count;
@@ -59,7 +58,6 @@ const map<string, double>& SearchServer::GetWordFrequencies(int document_id) con
 tuple<vector<string>, DocumentStatus> SearchServer::MatchDocument(const string& raw_query,
                                                                   int document_id) const {
     const auto query = ParseQuery(raw_query);
-
     vector<string> matched_words;
     for (const string& word : query.plus_words) {
         if (word_to_document_freqs_.count(word) == 0) {
@@ -106,7 +104,7 @@ bool SearchServer::IsStopWord(const string& word) const {
 }
 
 bool SearchServer::IsValidWord(const string& word) {
-    // A valid word must not contain special characters
+	// A valid word must not contain special characters
     return none_of(word.begin(), word.end(), [](char c) {
         return c >= '\0' && c < ' ';
     });

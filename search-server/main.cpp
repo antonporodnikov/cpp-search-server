@@ -6,10 +6,15 @@
 #include "request_queue.h"
 #include "search_server.h"
 #include "string_processing.h"
+#include "test_example_functions.h"
 
 using namespace std;
 
 int main() {
+    TestSearchServer();
+    // Если вы видите эту строку, значит все тесты прошли успешно
+    cout << "Search server testing finished"s << endl;
+
     SearchServer search_server("and with"s);
 
     AddDocument(search_server, 1, "funny pet and nasty rat"s, DocumentStatus::ACTUAL, {7, 2, 7});
