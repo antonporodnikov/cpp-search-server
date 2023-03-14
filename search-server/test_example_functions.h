@@ -49,8 +49,8 @@ void RunTestImpl(const Function& test_func, const std::string& test_func_str) {
 
 template <typename T, typename U>
 void AssertEqualImpl(const T& t, const U& u, const std::string& t_str,
-		             const std::string& u_str, const std::string& file,
-					 const std::string& func, unsigned line, const std::string& hint) {
+                     const std::string& u_str, const std::string& file,
+                     const std::string& func, unsigned line, const std::string& hint) {
     if (t != u) {
         std::cerr << std::boolalpha;
         std::cerr << file << "("s << line << "): "s << func << ": "s;
@@ -65,7 +65,7 @@ void AssertEqualImpl(const T& t, const U& u, const std::string& t_str,
 }
 
 void AssertImpl(bool value, const std::string& expr_str, const std::string& file,
-		        const std::string& func, unsigned line, const std::string& hint);
+                const std::string& func, unsigned line, const std::string& hint);
 
 void TestExcludeStopWordsFromAddedDocumentContent();
 

@@ -11,7 +11,7 @@ ostream& operator<<(ostream& out, const Document& document) {
 }
 
 void PrintMatchDocumentResult(int document_id, const vector<string>& words,
-		                      DocumentStatus status) {
+                              DocumentStatus status) {
     cout << "{ "s
          << "document_id = "s << document_id << ", "s
          << "status = "s << static_cast<int>(status) << ", "s

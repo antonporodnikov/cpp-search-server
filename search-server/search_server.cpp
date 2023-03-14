@@ -23,11 +23,11 @@ void SearchServer::AddDocument(int document_id, const string& document, Document
 }
 
 vector<int>::const_iterator SearchServer::begin() const {
-	return document_ids_.begin();
+    return document_ids_.begin();
 }
 
 vector<int>::const_iterator SearchServer::end() const {
-	return document_ids_.end();
+    return document_ids_.end();
 }
 
 vector<Document> SearchServer::FindTopDocuments(const string& raw_query,
@@ -47,12 +47,12 @@ int SearchServer::GetDocumentCount() const {
 }
 
 const map<string, double>& SearchServer::GetWordFrequencies(int document_id) const {
-	auto it = id_to_word_freqs_.find(document_id);
-	const static map<string, double> empty_map = {};
-	if (it != id_to_word_freqs_.end()) {
-		return (*it).second;
-	}
-	return empty_map;
+    auto it = id_to_word_freqs_.find(document_id);
+    const static map<string, double> empty_map = {};
+    if (it != id_to_word_freqs_.end()) {
+        return (*it).second;
+    }
+    return empty_map;
 }
 
 tuple<vector<string>, DocumentStatus> SearchServer::MatchDocument(const string& raw_query,
@@ -87,15 +87,15 @@ void SearchServer::RemoveDocument(int document_id) {
         }
     }
     {
-		auto it = documents_.find(document_id);
-		if (it != documents_.end()) {
-			documents_.erase(it);
-		}
+        auto it = documents_.find(document_id);
+        if (it != documents_.end()) {
+            documents_.erase(it);
+    }
     }
     {
-		auto it = find(document_ids_.begin(),
-				       document_ids_.end(), document_id);
-		document_ids_.erase(it);
+        auto it = find(document_ids_.begin(),
+                       document_ids_.end(), document_id);
+        document_ids_.erase(it);
     }
 }
 
@@ -104,7 +104,7 @@ bool SearchServer::IsStopWord(const string& word) const {
 }
 
 bool SearchServer::IsValidWord(const string& word) {
-	// A valid word must not contain special characters
+    // A valid word must not contain special characters
     return none_of(word.begin(), word.end(), [](char c) {
         return c >= '\0' && c < ' ';
     });

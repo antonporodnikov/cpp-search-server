@@ -29,7 +29,7 @@ ostream& operator<<(ostream& out, const DocumentStatus& status) {
 }
 
 void AssertImpl(bool value, const string& expr_str, const string& file,
-		        const string& func, unsigned line, const string& hint) {
+                const string& func, unsigned line, const string& hint) {
     if (!value) {
         cerr << file << "("s << line << "): "s << func << ": "s;
         cerr << "ASSERT("s << expr_str << ") failed."s;
@@ -195,88 +195,88 @@ void TestPredicatFucntionInFindTopDocuments() {
                           "In this case, second document id should be equal to 0"s);
     }
     {
-		SearchServer server("empty"s);
-		server.AddDocument(0, "fluffy cat beautiful dog"s, DocumentStatus::ACTUAL, {8, -3});
-		server.AddDocument(1, "angry cat angry dog"s, DocumentStatus::ACTUAL, {7, 2, 7});
-		server.AddDocument(2, "dog pretty eyes"s, DocumentStatus::ACTUAL, {5, -12, 2, 1});
-		server.AddDocument(3, "crazy bird"s, DocumentStatus::ACTUAL, {9});
-		const auto found_docs = server.FindTopDocuments("angry crazy cat with eyes"s,
-				[](int document_id, DocumentStatus status, int rating) {
-					return document_id < 0; });
-		ASSERT_HINT(found_docs.empty(),
-				"In this case, found_docs should not contain documents"s);
+        SearchServer server("empty"s);
+        server.AddDocument(0, "fluffy cat beautiful dog"s, DocumentStatus::ACTUAL, {8, -3});
+        server.AddDocument(1, "angry cat angry dog"s, DocumentStatus::ACTUAL, {7, 2, 7});
+        server.AddDocument(2, "dog pretty eyes"s, DocumentStatus::ACTUAL, {5, -12, 2, 1});
+        server.AddDocument(3, "crazy bird"s, DocumentStatus::ACTUAL, {9});
+        const auto found_docs = server.FindTopDocuments("angry crazy cat with eyes"s,
+                [](int document_id, DocumentStatus status, int rating) {
+                    return document_id < 0; });
+        ASSERT_HINT(found_docs.empty(),
+                    "In this case, found_docs should not contain documents"s);
     }
     {
-		SearchServer server("empty"s);
-		server.AddDocument(0, "fluffy cat beautiful dog"s, DocumentStatus::ACTUAL, {8, -3});
-		server.AddDocument(1, "angry cat angry dog"s, DocumentStatus::ACTUAL, {7, 2, 7});
-		server.AddDocument(2, "dog pretty eyes"s, DocumentStatus::ACTUAL, {5, -12, 2, 1});
-		server.AddDocument(3, "crazy bird"s, DocumentStatus::ACTUAL, {9});
-		const auto found_docs = server.FindTopDocuments("angry crazy cat with eyes"s,
-				[](int document_id, DocumentStatus status, int rating) {
-					return rating < 0; });
-		ASSERT_EQUAL_HINT(found_docs.size(), 1u,
-				  "in this case, only one document has a rating less than zero"s);
-		ASSERT_EQUAL_HINT(found_docs[0].id, 2,
-				  "In this case, document's id should be equal to 2"s);
+        SearchServer server("empty"s);
+        server.AddDocument(0, "fluffy cat beautiful dog"s, DocumentStatus::ACTUAL, {8, -3});
+        server.AddDocument(1, "angry cat angry dog"s, DocumentStatus::ACTUAL, {7, 2, 7});
+        server.AddDocument(2, "dog pretty eyes"s, DocumentStatus::ACTUAL, {5, -12, 2, 1});
+        server.AddDocument(3, "crazy bird"s, DocumentStatus::ACTUAL, {9});
+        const auto found_docs = server.FindTopDocuments("angry crazy cat with eyes"s,
+                [](int document_id, DocumentStatus status, int rating) {
+                    return rating < 0; });
+        ASSERT_EQUAL_HINT(found_docs.size(), 1u,
+                          "in this case, only one document has a rating less than zero"s);
+        ASSERT_EQUAL_HINT(found_docs[0].id, 2,
+                          "In this case, document's id should be equal to 2"s);
     }
 }
 
 void TestFindTopDocumentsFuncWithStatus() {
     {
-		SearchServer server("empty"s);
-		server.AddDocument(0, "fluffy cat beautiful dog"s, DocumentStatus::ACTUAL, {8, -3});
-		server.AddDocument(1, "angry cat angry dog"s, DocumentStatus::IRRELEVANT, {7, 2, 7});
-		server.AddDocument(2, "dog pretty eyes"s, DocumentStatus::BANNED, {5, -12, 2, 1});
-		server.AddDocument(3, "crazy bird"s, DocumentStatus::REMOVED, {9});
-		const auto found_doc_actual = server.FindTopDocuments("angry crazy cat with eyes"s,
-															  DocumentStatus::ACTUAL);
-		ASSERT_EQUAL_HINT(found_doc_actual[0].id, 0, "Wrong id, expected id is 0"s);
-		ASSERT_EQUAL_HINT(found_doc_actual.size(), 1u,
-						  "There should be one actual status document"s);
+        SearchServer server("empty"s);
+        server.AddDocument(0, "fluffy cat beautiful dog"s, DocumentStatus::ACTUAL, {8, -3});
+        server.AddDocument(1, "angry cat angry dog"s, DocumentStatus::IRRELEVANT, {7, 2, 7});
+        server.AddDocument(2, "dog pretty eyes"s, DocumentStatus::BANNED, {5, -12, 2, 1});
+        server.AddDocument(3, "crazy bird"s, DocumentStatus::REMOVED, {9});
+        const auto found_doc_actual = server.FindTopDocuments("angry crazy cat with eyes"s,
+                                                              DocumentStatus::ACTUAL);
+        ASSERT_EQUAL_HINT(found_doc_actual[0].id, 0, "Wrong id, expected id is 0"s);
+        ASSERT_EQUAL_HINT(found_doc_actual.size(), 1u,
+                          "There should be one actual status document"s);
 
-		const auto found_doc_irrelevant = server.FindTopDocuments("angry crazy cat with eyes"s,
-									                              DocumentStatus::IRRELEVANT);
-		ASSERT_EQUAL_HINT(found_doc_irrelevant[0].id, 1, "Wrong id, expected id is 1"s);
-		ASSERT_EQUAL_HINT(found_doc_irrelevant.size(), 1u,
-						  "There should be one irrelevant status document"s);
+        const auto found_doc_irrelevant = server.FindTopDocuments("angry crazy cat with eyes"s,
+                                                                  DocumentStatus::IRRELEVANT);
+        ASSERT_EQUAL_HINT(found_doc_irrelevant[0].id, 1, "Wrong id, expected id is 1"s);
+        ASSERT_EQUAL_HINT(found_doc_irrelevant.size(), 1u,
+                          "There should be one irrelevant status document"s);
 
-		const auto found_doc_banned = server.FindTopDocuments("angry crazy cat with eyes"s,
-									                          DocumentStatus::BANNED);
-		ASSERT_EQUAL_HINT(found_doc_banned[0].id, 2, "Wrong id, expected id is 2"s);
-		ASSERT_EQUAL_HINT(found_doc_banned.size(), 1u,
-						  "There should be one banned status document"s);
+        const auto found_doc_banned = server.FindTopDocuments("angry crazy cat with eyes"s,
+                                                              DocumentStatus::BANNED);
+        ASSERT_EQUAL_HINT(found_doc_banned[0].id, 2, "Wrong id, expected id is 2"s);
+        ASSERT_EQUAL_HINT(found_doc_banned.size(), 1u,
+                          "There should be one banned status document"s);
 
-		const auto found_doc_removed = server.FindTopDocuments("angry crazy cat with eyes"s,
-									                           DocumentStatus::REMOVED);
-		ASSERT_EQUAL_HINT(found_doc_removed[0].id, 3, "Wrong id, expected id is 3"s);
-		ASSERT_EQUAL_HINT(found_doc_removed.size(), 1u,
-						  "There should be one removed status document"s);
+        const auto found_doc_removed = server.FindTopDocuments("angry crazy cat with eyes"s,
+                                                               DocumentStatus::REMOVED);
+        ASSERT_EQUAL_HINT(found_doc_removed[0].id, 3, "Wrong id, expected id is 3"s);
+        ASSERT_EQUAL_HINT(found_doc_removed.size(), 1u,
+                          "There should be one removed status document"s);
     }
 }
 
 void TestDocumentsRelevanceCalc() {
     const DocumentStatus status = DocumentStatus::ACTUAL;
     {
-		SearchServer server("empty"s);
-		server.AddDocument(0, "fluffy cat beautiful dog"s, status, {8, -3});
-		double id0_doc_relevance = 0.173287;
-		server.AddDocument(1, "angry cat angry dog"s, status, {7, 2, 7});
-		double id1_doc_relevance = 0.866434;
-		server.AddDocument(2, "dog pretty eyes"s, status, {5, -12, 2, 1});
-		double id2_doc_relevance = 0.462098;
-		server.AddDocument(3, "crazy bird"s, status, {9});
-		double id3_doc_relevance = 0.693147;
-		const auto found_docs = server.FindTopDocuments("angry crazy cat with eyes"s);
-		ASSERT_HINT(abs(found_docs[0].relevance - id1_doc_relevance) < EPSILON,
-						"Wrong relevance, should be 0.866434 for this document");
-		ASSERT_HINT(abs(found_docs[1].relevance - id3_doc_relevance) < EPSILON,
-						"Wrong relevance, should be 0.866434 for this document");
-		ASSERT_HINT(abs(found_docs[2].relevance - id2_doc_relevance) < EPSILON,
-						"Wrong relevance, should be 0.866434 for this document");
-		ASSERT_HINT(abs(found_docs[3].relevance - id0_doc_relevance) < EPSILON,
-						"Wrong relevance, should be 0.866434 for this document");
-		}
+        SearchServer server("empty"s);
+        server.AddDocument(0, "fluffy cat beautiful dog"s, status, {8, -3});
+        double id0_doc_relevance = 0.173287;
+        server.AddDocument(1, "angry cat angry dog"s, status, {7, 2, 7});
+        double id1_doc_relevance = 0.866434;
+        server.AddDocument(2, "dog pretty eyes"s, status, {5, -12, 2, 1});
+        double id2_doc_relevance = 0.462098;
+        server.AddDocument(3, "crazy bird"s, status, {9});
+        double id3_doc_relevance = 0.693147;
+        const auto found_docs = server.FindTopDocuments("angry crazy cat with eyes"s);
+        ASSERT_HINT(abs(found_docs[0].relevance - id1_doc_relevance) < EPSILON,
+                    "Wrong relevance, should be 0.866434 for this document");
+        ASSERT_HINT(abs(found_docs[1].relevance - id3_doc_relevance) < EPSILON,
+                    "Wrong relevance, should be 0.866434 for this document");
+        ASSERT_HINT(abs(found_docs[2].relevance - id2_doc_relevance) < EPSILON,
+                    "Wrong relevance, should be 0.866434 for this document");
+        ASSERT_HINT(abs(found_docs[3].relevance - id0_doc_relevance) < EPSILON,
+                    "Wrong relevance, should be 0.866434 for this document");
+    }
 }
 
 void TestSearchServer() {

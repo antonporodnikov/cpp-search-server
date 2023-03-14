@@ -21,7 +21,7 @@ public:
 
     LogDuration(const std::string& id, std::ostream& stream)
         : id_(id)
-    	, stream_(stream) {
+        , stream_(stream) {
     }
 
     ~LogDuration() {
