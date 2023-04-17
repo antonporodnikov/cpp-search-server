@@ -19,14 +19,14 @@ void SearchServer::AddDocument(int document_id, const string& document, Document
         id_to_word_freqs_[document_id][word] += inv_word_count;
     }
     documents_.emplace(document_id, DocumentData{ComputeAverageRating(ratings), status});
-    document_ids_.push_back(document_id);
+    document_ids_.insert(document_id);
 }
 
-vector<int>::const_iterator SearchServer::begin() const {
+set<int>::const_iterator SearchServer::begin() const {
     return document_ids_.begin();
 }
 
-vector<int>::const_iterator SearchServer::end() const {
+set<int>::const_iterator SearchServer::end() const {
     return document_ids_.end();
 }
 
@@ -190,8 +190,9 @@ void MatchDocuments(const SearchServer& search_server, const string& query) {
     try {
         cout << "Matching for request: "s << query << endl;
         const int document_count = search_server.GetDocumentCount();
+        auto document_id_it = search_server.begin();
         for (int index = 0; index < document_count; ++index) {
-            const int document_id = *(search_server.begin() + index);
+            const int document_id = *document_id_it++;
             const auto [words, status] = search_server.MatchDocument(query, document_id);
             PrintMatchDocumentResult(document_id, words, status);
         }

@@ -39,5 +39,7 @@ int main() {
              << document.relevance << endl;
     }
 
+    MatchDocuments(search_server, "pet curly"s);
+
     return 0;
 }

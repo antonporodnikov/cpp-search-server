@@ -24,9 +24,9 @@ public:
     void AddDocument(int document_id, const std::string& document, DocumentStatus status,
                      const std::vector<int>& ratings);
 
-    std::vector<int>::const_iterator begin() const;
+    std::set<int>::const_iterator begin() const;
 
-    std::vector<int>::const_iterator end() const;
+    std::set<int>::const_iterator end() const;
 
     template <typename DocumentPredicate>
     std::vector<Document> FindTopDocuments(const std::string& raw_query,
@@ -55,7 +55,7 @@ private:
     std::map<std::string, std::map<int, double>> word_to_document_freqs_;
     std::map<int, std::map<std::string, double>> id_to_word_freqs_;
     std::map<int, DocumentData> documents_;
-    std::vector<int> document_ids_;
+    std::set<int> document_ids_;
 
     bool IsStopWord(const std::string& word) const;
 
