@@ -1,6 +1,7 @@
 #pragma once
 #include <algorithm>
 #include <cmath>
+#include <execution>
 #include <map>
 #include <numeric>
 #include <stdexcept>
@@ -45,6 +46,10 @@ public:
                                                                        int document_id) const;
 
     void RemoveDocument(int document_id);
+
+    void RemoveDocument(const std::execution::sequenced_policy& seq, int document_id);
+
+    void RemoveDocument(const std::execution::parallel_policy& par, int document_id);
 
 private:
     struct DocumentData {

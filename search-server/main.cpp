@@ -17,6 +17,7 @@ int main() {
     cout << "Search server testing finished"s << endl;
 
     SearchServer search_server("and with"s);
+
     int id = 0;
     for (
         const string& text : {
@@ -29,17 +30,25 @@ int main() {
     ) {
         search_server.AddDocument(++id, text, DocumentStatus::ACTUAL, {1, 2});
     }
-    const vector<string> queries = {
-        "nasty rat -not"s,
-        "not very funny nasty pet"s,
-        "curly hair"s
-    };
-    for (const Document& document : ProcessQueriesJoined(search_server, queries)) {
-        cout << "Document "s << document.id << " matched with relevance "s
-             << document.relevance << endl;
-    }
 
-    MatchDocuments(search_server, "pet curly"s);
+    const string query = "curly and funny"s;
+
+    auto report = [&search_server, &query] {
+        cout << search_server.GetDocumentCount() << " documents total, "s
+             << search_server.FindTopDocuments(query).size() 
+             << " documents for query ["s << query << "]"s << endl;
+    };
+
+    report();
+    // однопоточная версия
+    search_server.RemoveDocument(5);
+    report();
+    // однопоточная версия
+    search_server.RemoveDocument(execution::seq, 1);
+    report();
+    // многопоточная версия
+    search_server.RemoveDocument(execution::par, 2);
+    report();
 
     return 0;
 }

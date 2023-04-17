@@ -80,6 +80,9 @@ tuple<vector<string>, DocumentStatus> SearchServer::MatchDocument(const string& 
 }
 
 void SearchServer::RemoveDocument(int document_id) {
+    if (document_ids_.find(document_id) == document_ids_.end()) {
+        return;
+    }
     for (auto& [word, id_freq] : word_to_document_freqs_) {
         auto it = id_freq.find(document_id);
         if (it != id_freq.end()) {
@@ -90,7 +93,38 @@ void SearchServer::RemoveDocument(int document_id) {
         auto it = documents_.find(document_id);
         if (it != documents_.end()) {
             documents_.erase(it);
+        }
     }
+    {
+        auto it = find(document_ids_.begin(),
+                       document_ids_.end(), document_id);
+        document_ids_.erase(it);
+    }
+}
+
+void SearchServer::RemoveDocument(const std::execution::sequenced_policy& seq, int document_id) {
+    RemoveDocument(document_id);
+}
+
+void SearchServer::RemoveDocument(const std::execution::parallel_policy& par, int document_id) {
+    if (document_ids_.find(document_id) == document_ids_.end()) {
+        return;
+    }
+    vector<const string*> words_to_delete(id_to_word_freqs_.at(document_id).size());
+    transform(par, id_to_word_freqs_.at(document_id).begin(), 
+              id_to_word_freqs_.at(document_id).end(), words_to_delete.begin(), 
+              [](auto& word_freq) {
+                  return &word_freq.first;
+              });
+    for_each(par, words_to_delete.begin(), words_to_delete.end(),
+             [this, document_id](const string* word) {
+                 word_to_document_freqs_.at(*word).erase(document_id);
+             });
+    {
+        auto it = documents_.find(document_id);
+        if (it != documents_.end()) {
+            documents_.erase(it);
+        }
     }
     {
         auto it = find(document_ids_.begin(),
