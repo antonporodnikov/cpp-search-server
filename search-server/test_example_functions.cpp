@@ -279,6 +279,61 @@ void TestDocumentsRelevanceCalc() {
     }
 }
 
+void TestProcessQueries() {
+    {
+        SearchServer server("and with"s);
+        int id = 0;
+        for (
+            const string& text : {
+                "funny pet and nasty rat"s,
+                "funny pet with curly hair"s,
+                "funny pet and not very nasty rat"s,
+                "pet with rat and rat and rat"s,
+                "nasty rat with curly hair"s,
+            }
+        ) {
+            server.AddDocument(++id, text, DocumentStatus::ACTUAL, {1, 2});
+        }
+        const vector<string> queries = {
+            "nasty rat -not"s,
+            "not very funny nasty pet"s,
+            "curly hair"s
+        };
+        auto result = ProcessQueriesJoined(server, queries);
+        ASSERT_EQUAL_HINT(result.size(), 10, 
+                          "Wrong amount of documents, should be 10"s);
+        ASSERT_EQUAL_HINT(result.back().id, 5,
+                          "Wrong document added, id should be 5 for this document"s);
+        result.pop_back();
+        ASSERT_EQUAL_HINT(result.back().id, 2,
+                          "Wrong document added, id should be 2 for this document"s);
+        result.pop_back();
+        ASSERT_EQUAL_HINT(result.back().id, 4,
+                          "Wrong document added, id should be 4 for this document"s);
+        result.pop_back();
+        ASSERT_EQUAL_HINT(result.back().id, 5,
+                          "Wrong document added, id should be 5 for this document"s);
+        result.pop_back();
+        ASSERT_EQUAL_HINT(result.back().id, 2,
+                          "Wrong document added, id should be 2 for this document"s);
+        result.pop_back();
+        ASSERT_EQUAL_HINT(result.back().id, 1,
+                          "Wrong document added, id should be 1 for this document"s);
+        result.pop_back();
+        ASSERT_EQUAL_HINT(result.back().id, 3,
+                          "Wrong document added, id should be 3 for this document"s);
+        result.pop_back();
+        ASSERT_EQUAL_HINT(result.back().id, 4,
+                          "Wrong document added, id should be 4 for this document"s);
+        result.pop_back();
+        ASSERT_EQUAL_HINT(result.back().id, 5,
+                          "Wrong document added, id should be 5 for this document"s);
+        result.pop_back();
+        ASSERT_EQUAL_HINT(result.back().id, 1,
+                          "Wrong document added, id should be 1 for this document"s);
+    }
+}
+
 void TestSearchServer() {
     RUN_TEST(TestExcludeStopWordsFromAddedDocumentContent);
     RUN_TEST(TestSearchingAddDocument);
@@ -289,4 +344,5 @@ void TestSearchServer() {
     RUN_TEST(TestPredicatFucntionInFindTopDocuments);
     RUN_TEST(TestFindTopDocumentsFuncWithStatus);
     RUN_TEST(TestDocumentsRelevanceCalc);
+    RUN_TEST(TestProcessQueries);
 }

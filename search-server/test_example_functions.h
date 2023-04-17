@@ -2,6 +2,7 @@
 #include <iostream>
 
 #include "document.h"
+#include "process_queries.h"
 #include "search_server.h"
 
 #define RUN_TEST(func) RunTestImpl((func), #func)
@@ -86,3 +87,5 @@ void TestFindTopDocumentsFuncWithStatus();
 void TestDocumentsRelevanceCalc();
 
 void TestSearchServer();
+
+void TestProcessQueries();
