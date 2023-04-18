@@ -203,12 +203,19 @@ SearchServer::Query SearchServer::ParseQuery(const string& text) const {
         const auto query_word = ParseQueryWord(word);
         if (!query_word.is_stop) {
             if (query_word.is_minus) {
-                result.minus_words.insert(query_word.data);
+                result.minus_words.push_back(query_word.data);
             } else {
-                result.plus_words.insert(query_word.data);
+                result.plus_words.push_back(query_word.data);
             }
         }
     }
+    auto remove_duplicates = [](vector<string>& words) {
+        sort(words.begin(), words.end());
+        auto last = unique(words.begin(), words.end());
+        words.erase(last, words.end());
+    };
+    remove_duplicates(result.minus_words);
+    remove_duplicates(result.plus_words);
     return result;
 }
 
