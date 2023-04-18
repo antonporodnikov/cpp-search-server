@@ -46,22 +46,22 @@ public:
                                                                        int document_id) const;
 
     std::tuple<std::vector<std::string>, DocumentStatus> MatchDocument(
-        const std::execution::sequenced_policy& seq,
+        const std::execution::sequenced_policy&,
         const std::string& raw_query,
         int document_id
     ) const;
 
     std::tuple<std::vector<std::string>, DocumentStatus> MatchDocument(
-        const std::execution::parallel_policy& par,
+        const std::execution::parallel_policy& policy,
         const std::string& raw_query,
         int document_id
     ) const;
 
     void RemoveDocument(int document_id);
 
-    void RemoveDocument(const std::execution::sequenced_policy& seq, int document_id);
+    void RemoveDocument(const std::execution::sequenced_policy&, int document_id);
 
-    void RemoveDocument(const std::execution::parallel_policy& par, int document_id);
+    void RemoveDocument(const std::execution::parallel_policy& policy, int document_id);
 
 private:
     struct DocumentData {
@@ -96,6 +96,8 @@ private:
     };
 
     Query ParseQuery(const std::string& text) const;
+
+    Query ParseQueryPar(const std::string& text) const;
 
     // Existence required
     double ComputeWordInverseDocumentFreq(const std::string& word) const;
