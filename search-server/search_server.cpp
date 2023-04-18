@@ -79,6 +79,22 @@ tuple<vector<string>, DocumentStatus> SearchServer::MatchDocument(const string& 
     return {matched_words, documents_.at(document_id).status};
 }
 
+tuple<vector<string>, DocumentStatus> SearchServer::MatchDocument(
+    const execution::sequenced_policy& seq,
+    const string& raw_query,
+    int document_id
+) const {
+    return MatchDocument(raw_query, document_id);
+}
+
+tuple<vector<string>, DocumentStatus> SearchServer::MatchDocument(
+    const execution::parallel_policy& seq,
+    const string& raw_query,
+    int document_id
+) const {
+    return MatchDocument(raw_query, document_id);
+}
+
 void SearchServer::RemoveDocument(int document_id) {
     if (document_ids_.find(document_id) == document_ids_.end()) {
         return;

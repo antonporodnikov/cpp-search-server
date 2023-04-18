@@ -45,6 +45,18 @@ public:
     std::tuple<std::vector<std::string>, DocumentStatus> MatchDocument(const std::string& raw_query,
                                                                        int document_id) const;
 
+    std::tuple<std::vector<std::string>, DocumentStatus> MatchDocument(
+        const std::execution::sequenced_policy& seq,
+        const std::string& raw_query,
+        int document_id
+    ) const;
+
+    std::tuple<std::vector<std::string>, DocumentStatus> MatchDocument(
+        const std::execution::parallel_policy& par,
+        const std::string& raw_query,
+        int document_id
+    ) const;
+
     void RemoveDocument(int document_id);
 
     void RemoveDocument(const std::execution::sequenced_policy& seq, int document_id);
