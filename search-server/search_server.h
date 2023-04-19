@@ -24,7 +24,7 @@ public:
 
     explicit SearchServer(std::string_view stop_words_text);
 
-    void AddDocument(int document_id, const std::string& document, DocumentStatus status,
+    void AddDocument(int document_id, std::string_view document, DocumentStatus status,
                      const std::vector<int>& ratings);
 
     std::set<int>::const_iterator begin() const;
@@ -42,7 +42,7 @@ public:
 
     int GetDocumentCount() const;
 
-    const std::map<std::string, double>& GetWordFrequencies(int document_id) const;
+    // const std::map<std::string, double>& GetWordFrequencies(int document_id) const;
 
     std::tuple<std::vector<std::string>, DocumentStatus> MatchDocument(const std::string& raw_query,
                                                                        int document_id) const;
@@ -59,11 +59,11 @@ public:
         int document_id
     ) const;
 
-    void RemoveDocument(int document_id);
+    // void RemoveDocument(int document_id);
 
-    void RemoveDocument(const std::execution::sequenced_policy&, int document_id);
+    // void RemoveDocument(const std::execution::sequenced_policy&, int document_id);
 
-    void RemoveDocument(const std::execution::parallel_policy& policy, int document_id);
+    // void RemoveDocument(const std::execution::parallel_policy& policy, int document_id);
 
 private:
     struct DocumentData {
@@ -71,8 +71,9 @@ private:
         DocumentStatus status;
     };
     const std::set<std::string, std::less<>> stop_words_;
-    std::map<std::string, std::map<int, double>> word_to_document_freqs_;
-    std::map<int, std::map<std::string, double>> id_to_word_freqs_;
+    std::map<int, std::vector<std::string>> document_to_words_;
+    std::map<std::string_view, std::map<int, double>> word_to_document_freqs_;
+    std::map<int, std::map<std::string_view, double>> id_to_word_freqs_;
     std::map<int, DocumentData> documents_;
     std::set<int> document_ids_;
 

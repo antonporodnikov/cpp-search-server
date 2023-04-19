@@ -3,7 +3,7 @@
 #include "paginator.h"
 #include "process_queries.h"
 #include "read_input_functions.h"
-#include "remove_duplicates.h"
+// #include "remove_duplicates.h"
 #include "request_queue.h"
 #include "search_server.h"
 #include "string_processing.h"
@@ -26,9 +26,9 @@ int main() {
         const string& text : {
             "funny pet and nasty rat"s,
             "funny pet with curly hair"s,
-            "funny pet and not very nasty rat"s,
-            "pet with rat and rat and rat"s,
-            "nasty rat with curly hair"s,
+            // "funny pet and not very nasty rat"s,
+            // "pet with rat and rat and rat"s,
+            // "nasty rat with curly hair"s,
         }
     ) {
         search_server.AddDocument(++id, text, DocumentStatus::ACTUAL, {1, 2});
