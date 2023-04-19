@@ -8,6 +8,12 @@ SearchServer::SearchServer(const string& stop_words_text)
 {
 }
 
+SearchServer::SearchServer(string_view stop_words_text)
+    // Invoke delegating constructor from string container
+    : SearchServer(SplitIntoWords(string(stop_words_text.begin(), stop_words_text.end())))
+{
+}
+
 void SearchServer::AddDocument(int document_id, const string& document, DocumentStatus status,
                                const vector<int>& ratings) {
     if ((document_id < 0) || (documents_.count(document_id) > 0)) {

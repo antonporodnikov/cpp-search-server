@@ -22,6 +22,8 @@ public:
 
     explicit SearchServer(const std::string& stop_words_text);
 
+    explicit SearchServer(std::string_view stop_words_text);
+
     void AddDocument(int document_id, const std::string& document, DocumentStatus status,
                      const std::vector<int>& ratings);
 
@@ -68,7 +70,7 @@ private:
         int rating;
         DocumentStatus status;
     };
-    const std::set<std::string> stop_words_;
+    const std::set<std::string, std::less<>> stop_words_;
     std::map<std::string, std::map<int, double>> word_to_document_freqs_;
     std::map<int, std::map<std::string, double>> id_to_word_freqs_;
     std::map<int, DocumentData> documents_;

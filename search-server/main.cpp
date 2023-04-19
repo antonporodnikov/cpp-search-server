@@ -16,7 +16,10 @@ int main() {
     // Если вы видите эту строку, значит все тесты прошли успешно
     cout << "Search server testing finished"s << endl;
 
-    SearchServer search_server("and with"s);
+    // SearchServer search_server("and with"s);
+
+    string_view stop_words = "and with";
+    SearchServer search_server(stop_words);
 
     int id = 0;
     for (
@@ -31,25 +34,27 @@ int main() {
         search_server.AddDocument(++id, text, DocumentStatus::ACTUAL, {1, 2});
     }
 
-    const string query = "curly and funny -not"s;
+    cout << "[ program finished successfully ]"s << endl;
 
-    {
-        const auto [words, status] = search_server.MatchDocument(query, 1);
-        cout << words.size() << " words for document 1"s << endl;
-        // 1 words for document 1
-    }
+    // const string query = "curly and funny -not"s;
 
-    {
-        const auto [words, status] = search_server.MatchDocument(execution::seq, query, 2);
-        cout << words.size() << " words for document 2"s << endl;
-        // 2 words for document 2
-    }
+    // {
+    //     const auto [words, status] = search_server.MatchDocument(query, 1);
+    //     cout << words.size() << " words for document 1"s << endl;
+    //     // 1 words for document 1
+    // }
 
-    {
-        const auto [words, status] = search_server.MatchDocument(execution::par, query, 3);
-        cout << words.size() << " words for document 3"s << endl;
-        // 0 words for document 3
-    }
+    // {
+    //     const auto [words, status] = search_server.MatchDocument(execution::seq, query, 2);
+    //     cout << words.size() << " words for document 2"s << endl;
+    //     // 2 words for document 2
+    // }
+
+    // {
+    //     const auto [words, status] = search_server.MatchDocument(execution::par, query, 3);
+    //     cout << words.size() << " words for document 3"s << endl;
+    //     // 0 words for document 3
+    // }
 
     return 0;
 }
