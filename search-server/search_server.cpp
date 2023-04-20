@@ -38,7 +38,7 @@ set<int>::const_iterator SearchServer::end() const {
     return document_ids_.end();
 }
 
-vector<Document> SearchServer::FindTopDocuments(const string& raw_query,
+vector<Document> SearchServer::FindTopDocuments(string_view raw_query,
                                                 DocumentStatus status) const {
     return FindTopDocuments(
         raw_query, [status](int document_id, DocumentStatus document_status, int rating) {
@@ -46,7 +46,7 @@ vector<Document> SearchServer::FindTopDocuments(const string& raw_query,
         });
 }
 
-vector<Document> SearchServer::FindTopDocuments(const string& raw_query) const {
+vector<Document> SearchServer::FindTopDocuments(string_view raw_query) const {
     return FindTopDocuments(raw_query, DocumentStatus::ACTUAL);
 }
 
@@ -63,78 +63,78 @@ int SearchServer::GetDocumentCount() const {
 //     return empty_map;
 // }
 
-tuple<vector<string>, DocumentStatus> SearchServer::MatchDocument(const string& raw_query,
-                                                                  int document_id) const {
-    const auto query = ParseQuery(raw_query);
-    if (any_of(
-        query.minus_words.begin(),
-        query.minus_words.end(),
-        [this, document_id](const string& minus_word) {
-            return word_to_document_freqs_.count(minus_word) != 0 &&
-            word_to_document_freqs_.at(minus_word).count(document_id);
-        }
-    )) {
-        return {vector<string>{}, documents_.at(document_id).status};
-    }
-    vector<string> matched_words(query.plus_words.size());
-    auto it_last = copy_if(
-        query.plus_words.begin(),
-        query.plus_words.end(),
-        matched_words.begin(),
-        [this, document_id](const string& plus_word) {
-            return word_to_document_freqs_.count(plus_word) != 0 &&
-            word_to_document_freqs_.at(plus_word).count(document_id);
-        }
-    );
-    matched_words.erase(it_last, matched_words.end());
-    sort(matched_words.begin(), matched_words.end());
-    it_last = unique(matched_words.begin(), matched_words.end());
-    matched_words.erase(it_last, matched_words.end());
-    return {matched_words, documents_.at(document_id).status};
-}
+// tuple<vector<string>, DocumentStatus> SearchServer::MatchDocument(string_view raw_query,
+//                                                                   int document_id) const {
+//     const auto query = ParseQuery(raw_query);
+//     if (any_of(
+//         query.minus_words.begin(),
+//         query.minus_words.end(),
+//         [this, document_id](const string& minus_word) {
+//             return word_to_document_freqs_.count(minus_word) != 0 &&
+//             word_to_document_freqs_.at(minus_word).count(document_id);
+//         }
+//     )) {
+//         return {vector<string>{}, documents_.at(document_id).status};
+//     }
+//     vector<string> matched_words(query.plus_words.size());
+//     auto it_last = copy_if(
+//         query.plus_words.begin(),
+//         query.plus_words.end(),
+//         matched_words.begin(),
+//         [this, document_id](const string& plus_word) {
+//             return word_to_document_freqs_.count(plus_word) != 0 &&
+//             word_to_document_freqs_.at(plus_word).count(document_id);
+//         }
+//     );
+//     matched_words.erase(it_last, matched_words.end());
+//     sort(matched_words.begin(), matched_words.end());
+//     it_last = unique(matched_words.begin(), matched_words.end());
+//     matched_words.erase(it_last, matched_words.end());
+//     return {matched_words, documents_.at(document_id).status};
+// }
 
-tuple<vector<string>, DocumentStatus> SearchServer::MatchDocument(
-    const execution::sequenced_policy&,
-    const string& raw_query,
-    int document_id
-) const {
-    return MatchDocument(raw_query, document_id);
-}
+// tuple<vector<string>, DocumentStatus> SearchServer::MatchDocument(
+//     const execution::sequenced_policy&,
+//     const string& raw_query,
+//     int document_id
+// ) const {
+//     return MatchDocument(raw_query, document_id);
+// }
 
-tuple<vector<string>, DocumentStatus> SearchServer::MatchDocument(
-    const execution::parallel_policy& policy,
-    const string& raw_query,
-    int document_id
-) const {
-    const auto query = ParseQueryPar(raw_query);
-    if (any_of(
-        policy,
-        query.minus_words.begin(),
-        query.minus_words.end(),
-        [this, document_id](const string& minus_word) {
-            return word_to_document_freqs_.count(minus_word) != 0 &&
-            word_to_document_freqs_.at(minus_word).count(document_id);
-        }
-    )) {
-        return {vector<string>{}, documents_.at(document_id).status};
-    }
-    vector<string> matched_words(query.plus_words.size());
-    auto it_last = copy_if(
-        policy,
-        query.plus_words.begin(),
-        query.plus_words.end(),
-        matched_words.begin(),
-        [this, document_id](const string& plus_word) {
-            return word_to_document_freqs_.count(plus_word) != 0 &&
-            word_to_document_freqs_.at(plus_word).count(document_id);
-        }
-    );
-    matched_words.erase(it_last, matched_words.end());
-    sort(policy, matched_words.begin(), matched_words.end());
-    it_last = unique(matched_words.begin(), matched_words.end());
-    matched_words.erase(it_last, matched_words.end());
-    return {matched_words, documents_.at(document_id).status};
-}
+// tuple<vector<string>, DocumentStatus> SearchServer::MatchDocument(
+//     const execution::parallel_policy& policy,
+//     const string& raw_query,
+//     int document_id
+// ) const {
+//     const auto query = ParseQueryPar(raw_query);
+//     if (any_of(
+//         policy,
+//         query.minus_words.begin(),
+//         query.minus_words.end(),
+//         [this, document_id](const string& minus_word) {
+//             return word_to_document_freqs_.count(minus_word) != 0 &&
+//             word_to_document_freqs_.at(minus_word).count(document_id);
+//         }
+//     )) {
+//         return {vector<string>{}, documents_.at(document_id).status};
+//     }
+//     vector<string> matched_words(query.plus_words.size());
+//     auto it_last = copy_if(
+//         policy,
+//         query.plus_words.begin(),
+//         query.plus_words.end(),
+//         matched_words.begin(),
+//         [this, document_id](const string& plus_word) {
+//             return word_to_document_freqs_.count(plus_word) != 0 &&
+//             word_to_document_freqs_.at(plus_word).count(document_id);
+//         }
+//     );
+//     matched_words.erase(it_last, matched_words.end());
+//     sort(policy, matched_words.begin(), matched_words.end());
+//     it_last = unique(matched_words.begin(), matched_words.end());
+//     matched_words.erase(it_last, matched_words.end());
+//     return {matched_words, documents_.at(document_id).status};
+// }
 
 // void SearchServer::RemoveDocument(int document_id) {
 //     if (document_ids_.find(document_id) == document_ids_.end()) {
@@ -238,10 +238,10 @@ SearchServer::QueryWord SearchServer::ParseQueryWord(const string& text) const {
     return {word, is_minus, IsStopWord(word)};
 }
 
-SearchServer::Query SearchServer::ParseQuery(const string& text) const {
+SearchServer::Query SearchServer::ParseQuery(string_view text) const {
     Query result;
-    for (const string& word : SplitIntoWords(text)) {
-        const auto query_word = ParseQueryWord(word);
+    for (string_view word : SplitIntoWordsSTRV(text)) {
+        const auto query_word = ParseQueryWord(string(word.begin(), word.end()));
         if (!query_word.is_stop) {
             if (query_word.is_minus) {
                 result.minus_words.push_back(query_word.data);
@@ -260,20 +260,20 @@ SearchServer::Query SearchServer::ParseQuery(const string& text) const {
     return result;
 }
 
-SearchServer::Query SearchServer::ParseQueryPar(const string& text) const {
-    Query result;
-    for (const string& word : SplitIntoWords(text)) {
-        const auto query_word = ParseQueryWord(word);
-        if (!query_word.is_stop) {
-            if (query_word.is_minus) {
-                result.minus_words.push_back(query_word.data);
-            } else {
-                result.plus_words.push_back(query_word.data);
-            }
-        }
-    }
-    return result;
-}
+// SearchServer::Query SearchServer::ParseQueryPar(string_view text) const {
+//     Query result;
+//     for (string_view word : SplitIntoWordsSTRV(text)) {
+//         const auto query_word = ParseQueryWord(string(word.begin(), word.end()));
+//         if (!query_word.is_stop) {
+//             if (query_word.is_minus) {
+//                 result.minus_words.push_back(query_word.data);
+//             } else {
+//                 result.plus_words.push_back(query_word.data);
+//             }
+//         }
+//     }
+//     return result;
+// }
 
 double SearchServer::ComputeWordInverseDocumentFreq(const string& word) const {
     return log(GetDocumentCount() * 1.0 / word_to_document_freqs_.at(word).size());
@@ -299,17 +299,17 @@ void FindTopDocuments(const SearchServer& search_server, const string& raw_query
     }
 }
 
-void MatchDocuments(const SearchServer& search_server, const string& query) {
-    try {
-        cout << "Matching for request: "s << query << endl;
-        const int document_count = search_server.GetDocumentCount();
-        auto document_id_it = search_server.begin();
-        for (int index = 0; index < document_count; ++index) {
-            const int document_id = *document_id_it++;
-            const auto [words, status] = search_server.MatchDocument(query, document_id);
-            PrintMatchDocumentResult(document_id, words, status);
-        }
-    } catch (const exception& e) {
-        cout << "Error in matchig request "s << query << ": "s << e.what() << endl;
-    }
-}
+// void MatchDocuments(const SearchServer& search_server, const string& query) {
+//     try {
+//         cout << "Matching for request: "s << query << endl;
+//         const int document_count = search_server.GetDocumentCount();
+//         auto document_id_it = search_server.begin();
+//         for (int index = 0; index < document_count; ++index) {
+//             const int document_id = *document_id_it++;
+//             const auto [words, status] = search_server.MatchDocument(query, document_id);
+//             PrintMatchDocumentResult(document_id, words, status);
+//         }
+//     } catch (const exception& e) {
+//         cout << "Error in matchig request "s << query << ": "s << e.what() << endl;
+//     }
+// }

@@ -2,7 +2,7 @@
 
 using namespace std;
 
-vector<std::string> SplitIntoWords(const string& text) {
+vector<string> SplitIntoWords(const string& text) {
     vector<string> words;
     string word;
     for (const char c : text) {
@@ -19,4 +19,20 @@ vector<std::string> SplitIntoWords(const string& text) {
         words.push_back(word);
     }
     return words;
+}
+
+vector<string_view> SplitIntoWordsSTRV(string_view text) {
+    vector<string_view> output;
+    string_view delim = " ";
+    size_t first = 0;
+    while (first < text.size())
+    {
+        const auto second = text.find_first_of(delim, first);
+        if (first != second)
+            output.emplace_back(text.substr(first, second - first));
+        if (second == string_view::npos)
+            break;
+        first = second + 1;
+    }
+    return output;
 }

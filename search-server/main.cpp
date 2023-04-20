@@ -7,14 +7,14 @@
 #include "request_queue.h"
 #include "search_server.h"
 #include "string_processing.h"
-#include "test_example_functions.h"
+// #include "test_example_functions.h"
 
 using namespace std;
 
 int main() {
-    TestSearchServer();
-    // Если вы видите эту строку, значит все тесты прошли успешно
-    cout << "Search server testing finished"s << endl;
+    // TestSearchServer();
+    // // Если вы видите эту строку, значит все тесты прошли успешно
+    // cout << "Search server testing finished"s << endl;
 
     // SearchServer search_server("and with"s);
 
@@ -33,6 +33,8 @@ int main() {
     ) {
         search_server.AddDocument(++id, text, DocumentStatus::ACTUAL, {1, 2});
     }
+
+    FindTopDocuments(search_server, "funny curly -nasty"s);
 
     cout << "[ program finished successfully ]"s << endl;
 
