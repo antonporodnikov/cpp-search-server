@@ -54,141 +54,175 @@ int SearchServer::GetDocumentCount() const {
     return documents_.size();
 }
 
-// const map<string, double>& SearchServer::GetWordFrequencies(int document_id) const {
-//     auto it = id_to_word_freqs_.find(document_id);
-//     const static map<string, double> empty_map = {};
-//     if (it != id_to_word_freqs_.end()) {
-//         return (*it).second;
-//     }
-//     return empty_map;
-// }
+const map<string_view, double>& SearchServer::GetWordFrequencies(int document_id) const {
+    auto it = id_to_word_freqs_.find(document_id);
+    const static map<string_view, double> empty_map = {};
+    if (it != id_to_word_freqs_.end()) {
+        return (*it).second;
+    }
+    return empty_map;
+}
 
-// tuple<vector<string>, DocumentStatus> SearchServer::MatchDocument(string_view raw_query,
-//                                                                   int document_id) const {
-//     const auto query = ParseQuery(raw_query);
-//     if (any_of(
-//         query.minus_words.begin(),
-//         query.minus_words.end(),
-//         [this, document_id](const string& minus_word) {
-//             return word_to_document_freqs_.count(minus_word) != 0 &&
-//             word_to_document_freqs_.at(minus_word).count(document_id);
-//         }
-//     )) {
-//         return {vector<string>{}, documents_.at(document_id).status};
-//     }
-//     vector<string> matched_words(query.plus_words.size());
-//     auto it_last = copy_if(
-//         query.plus_words.begin(),
-//         query.plus_words.end(),
-//         matched_words.begin(),
-//         [this, document_id](const string& plus_word) {
-//             return word_to_document_freqs_.count(plus_word) != 0 &&
-//             word_to_document_freqs_.at(plus_word).count(document_id);
-//         }
-//     );
-//     matched_words.erase(it_last, matched_words.end());
-//     sort(matched_words.begin(), matched_words.end());
-//     it_last = unique(matched_words.begin(), matched_words.end());
-//     matched_words.erase(it_last, matched_words.end());
-//     return {matched_words, documents_.at(document_id).status};
-// }
+tuple<vector<string_view>, DocumentStatus> SearchServer::MatchDocument(string_view raw_query,
+                                                                       int document_id) const {
+    const auto query = ParseQuery(raw_query);
+    if (any_of(
+        query.minus_words.begin(),
+        query.minus_words.end(),
+        [this, document_id](string_view minus_word) {
+            return word_to_document_freqs_.count(minus_word) != 0 &&
+            word_to_document_freqs_.at(minus_word).count(document_id);
+        }
+    )) {
+        return {vector<string_view>{}, documents_.at(document_id).status};
+    }
+    // vector<string_view> matched_words(query.plus_words.size());
+    // auto it_last = copy_if(
+    //     query.plus_words.begin(),
+    //     query.plus_words.end(),
+    //     matched_words.begin(),
+    //     [this, document_id](string_view plus_word) {
+    //         return word_to_document_freqs_.count(plus_word) != 0 &&
+    //         word_to_document_freqs_.at(plus_word).count(document_id);
+    //     }
+    // );
+    // sort(matched_words.begin(), it_last);
+    // auto it_last_new = unique(matched_words.begin(), it_last);
+    // matched_words.erase(it_last_new, matched_words.end());
+    // return {matched_words, documents_.at(document_id).status};
+    vector<string_view> matched_words;
+    for (string_view word : query.plus_words) {
+        if (word_to_document_freqs_.count(word) == 0) {
+            continue;
+        }
+        if (word_to_document_freqs_.at(word).count(document_id)) {
+            matched_words.push_back(word);
+        }
+    }
+    // for (string_view word : query.minus_words) {
+    //     if (word_to_document_freqs_.count(word) == 0) {
+    //         continue;
+    //     }
+    //     if (word_to_document_freqs_.at(word).count(document_id)) {
+    //         matched_words.clear();
+    //         break;
+    //     }
+    // }
+    return {matched_words, documents_.at(document_id).status};
+}
 
-// tuple<vector<string>, DocumentStatus> SearchServer::MatchDocument(
-//     const execution::sequenced_policy&,
-//     const string& raw_query,
-//     int document_id
-// ) const {
-//     return MatchDocument(raw_query, document_id);
-// }
+tuple<vector<string_view>, DocumentStatus> SearchServer::MatchDocument(
+    const execution::sequenced_policy&,
+    string_view raw_query,
+    int document_id
+) const {
+    return MatchDocument(raw_query, document_id);
+}
 
-// tuple<vector<string>, DocumentStatus> SearchServer::MatchDocument(
-//     const execution::parallel_policy& policy,
-//     const string& raw_query,
-//     int document_id
-// ) const {
-//     const auto query = ParseQueryPar(raw_query);
-//     if (any_of(
-//         policy,
-//         query.minus_words.begin(),
-//         query.minus_words.end(),
-//         [this, document_id](const string& minus_word) {
-//             return word_to_document_freqs_.count(minus_word) != 0 &&
-//             word_to_document_freqs_.at(minus_word).count(document_id);
-//         }
-//     )) {
-//         return {vector<string>{}, documents_.at(document_id).status};
-//     }
-//     vector<string> matched_words(query.plus_words.size());
-//     auto it_last = copy_if(
-//         policy,
-//         query.plus_words.begin(),
-//         query.plus_words.end(),
-//         matched_words.begin(),
-//         [this, document_id](const string& plus_word) {
-//             return word_to_document_freqs_.count(plus_word) != 0 &&
-//             word_to_document_freqs_.at(plus_word).count(document_id);
-//         }
-//     );
-//     matched_words.erase(it_last, matched_words.end());
-//     sort(policy, matched_words.begin(), matched_words.end());
-//     it_last = unique(matched_words.begin(), matched_words.end());
-//     matched_words.erase(it_last, matched_words.end());
-//     return {matched_words, documents_.at(document_id).status};
-// }
+tuple<vector<string_view>, DocumentStatus> SearchServer::MatchDocument(
+    const execution::parallel_policy& policy,
+    string_view raw_query,
+    int document_id
+) const {
+    const auto query = ParseQueryPar(raw_query);
+    if (any_of(
+        policy,
+        query.minus_words.begin(),
+        query.minus_words.end(),
+        [this, document_id](string_view minus_word) {
+            return word_to_document_freqs_.count(minus_word) != 0 &&
+            word_to_document_freqs_.at(minus_word).count(document_id);
+        }
+    )) {
+        return {vector<string_view>{}, documents_.at(document_id).status};
+    }
+    vector<string_view> matched_words(query.plus_words.size());
+    auto it_last = copy_if(
+        policy,
+        query.plus_words.begin(),
+        query.plus_words.end(),
+        matched_words.begin(),
+        [this, document_id](string_view plus_word) {
+            return word_to_document_freqs_.count(plus_word) != 0 &&
+            word_to_document_freqs_.at(plus_word).count(document_id);
+        }
+    );
+    // matched_words.erase(it_last, matched_words.end());
+    // sort(policy, matched_words.begin(), matched_words.end());
+    // it_last = unique(matched_words.begin(), matched_words.end());
+    // matched_words.erase(it_last, matched_words.end());
+    // return {matched_words, documents_.at(document_id).status};
+    sort(policy, matched_words.begin(), it_last);
+    auto it_last_new = unique(matched_words.begin(), it_last);
+    matched_words.erase(it_last_new, matched_words.end());
+    return {matched_words, documents_.at(document_id).status};
+}
 
-// void SearchServer::RemoveDocument(int document_id) {
-//     if (document_ids_.find(document_id) == document_ids_.end()) {
-//         return;
-//     }
-//     for (auto& [word, id_freq] : word_to_document_freqs_) {
-//         auto it = id_freq.find(document_id);
-//         if (it != id_freq.end()) {
-//             id_freq.erase(it);
-//         }
-//     }
-//     {
-//         auto it = documents_.find(document_id);
-//         if (it != documents_.end()) {
-//             documents_.erase(it);
-//         }
-//     }
-//     {
-//         auto it = find(document_ids_.begin(),
-//                        document_ids_.end(), document_id);
-//         document_ids_.erase(it);
-//     }
-// }
+void SearchServer::RemoveDocument(int document_id) {
+    if (document_ids_.find(document_id) == document_ids_.end()) {
+        return;
+    }
+    for (auto& [word, id_freq] : word_to_document_freqs_) {
+        auto it = id_freq.find(document_id);
+        if (it != id_freq.end()) {
+            id_freq.erase(it);
+        }
+    }
+    {
+        auto it = document_to_words_.find(document_id);
+        if (it != document_to_words_.end()) {
+            document_to_words_.erase(it);
+        }
+    }
+    {
+        auto it = documents_.find(document_id);
+        if (it != documents_.end()) {
+            documents_.erase(it);
+        }
+    }
+    {
+        auto it = find(document_ids_.begin(),
+                       document_ids_.end(), document_id);
+        document_ids_.erase(it);
+    }
+}
 
-// void SearchServer::RemoveDocument(const std::execution::sequenced_policy&, int document_id) {
-//     RemoveDocument(document_id);
-// }
+void SearchServer::RemoveDocument(const std::execution::sequenced_policy&, int document_id) {
+    RemoveDocument(document_id);
+}
 
-// void SearchServer::RemoveDocument(const std::execution::parallel_policy& policy, int document_id) {
-//     if (document_ids_.find(document_id) == document_ids_.end()) {
-//         return;
-//     }
-//     vector<const string*> words_to_delete(id_to_word_freqs_.at(document_id).size());
-//     transform(policy, id_to_word_freqs_.at(document_id).begin(), 
-//               id_to_word_freqs_.at(document_id).end(), words_to_delete.begin(), 
-//               [](auto& word_freq) {
-//                   return &word_freq.first;
-//               });
-//     for_each(policy, words_to_delete.begin(), words_to_delete.end(),
-//              [this, document_id](const string* word) {
-//                  word_to_document_freqs_.at(*word).erase(document_id);
-//              });
-//     {
-//         auto it = documents_.find(document_id);
-//         if (it != documents_.end()) {
-//             documents_.erase(it);
-//         }
-//     }
-//     {
-//         auto it = find(document_ids_.begin(),
-//                        document_ids_.end(), document_id);
-//         document_ids_.erase(it);
-//     }
-// }
+void SearchServer::RemoveDocument(const std::execution::parallel_policy& policy, int document_id) {
+    if (document_ids_.find(document_id) == document_ids_.end()) {
+        return;
+    }
+    vector<string_view> words_to_delete(id_to_word_freqs_.at(document_id).size());
+    transform(policy, id_to_word_freqs_.at(document_id).begin(), 
+              id_to_word_freqs_.at(document_id).end(), words_to_delete.begin(), 
+              [](auto word_freq) {
+                  return word_freq.first;
+              });
+    for_each(policy, words_to_delete.begin(), words_to_delete.end(),
+             [this, document_id](string_view word) {
+                 word_to_document_freqs_.at(word).erase(document_id);
+             });
+    {
+        auto it = document_to_words_.find(document_id);
+        if (it != document_to_words_.end()) {
+            document_to_words_.erase(it);
+        }
+    }
+    {
+        auto it = documents_.find(document_id);
+        if (it != documents_.end()) {
+            documents_.erase(it);
+        }
+    }
+    {
+        auto it = find(document_ids_.begin(),
+                       document_ids_.end(), document_id);
+        document_ids_.erase(it);
+    }
+}
 
 bool SearchServer::IsStopWord(const string& word) const {
     return stop_words_.count(word) > 0;
@@ -197,6 +231,18 @@ bool SearchServer::IsStopWord(const string& word) const {
 bool SearchServer::IsValidWord(const string& word) {
     // A valid word must not contain special characters
     return none_of(word.begin(), word.end(), [](char c) {
+        return c >= '\0' && c < ' ';
+    });
+}
+
+bool SearchServer::IsStopWordSTRV(string_view word) const {
+    return stop_words_.count(word) > 0;
+}
+
+bool SearchServer::IsValidWordSTRV(string_view word) {
+    // A valid word must not contain special characters
+    string word_str(word.begin(), word.end());
+    return none_of(word_str.begin(), word_str.end(), [](char c) {
         return c >= '\0' && c < ' ';
     });
 }
@@ -222,26 +268,42 @@ int SearchServer::ComputeAverageRating(const vector<int>& ratings) {
     return rating_sum / static_cast<int>(ratings.size());
 }
 
-SearchServer::QueryWord SearchServer::ParseQueryWord(const string& text) const {
+// SearchServer::QueryWord SearchServer::ParseQueryWord(const string& text) const {
+//     if (text.empty()) {
+//         throw invalid_argument("Query word is empty"s);
+//     }
+//     string word = text;
+//     bool is_minus = false;
+//     if (word[0] == '-') {
+//         is_minus = true;
+//         word = word.substr(1);
+//     }
+//     if (word.empty() || word[0] == '-' || !IsValidWord(word)) {
+//         throw invalid_argument("Query word "s + text + " is invalid");
+//     }
+//     return {word, is_minus, IsStopWord(word)};
+// }
+
+SearchServer::QueryWord SearchServer::ParseQueryWord(string_view text) const {
     if (text.empty()) {
         throw invalid_argument("Query word is empty"s);
     }
-    string word = text;
+    string_view word = text;
     bool is_minus = false;
     if (word[0] == '-') {
         is_minus = true;
         word = word.substr(1);
     }
-    if (word.empty() || word[0] == '-' || !IsValidWord(word)) {
-        throw invalid_argument("Query word "s + text + " is invalid");
+    if (word.empty() || word[0] == '-' || !IsValidWordSTRV(word)) {
+        throw invalid_argument("Query word "s + string(text.begin(), text.end()) + " is invalid");
     }
-    return {word, is_minus, IsStopWord(word)};
+    return {word, is_minus, IsStopWordSTRV(word)};
 }
 
 SearchServer::Query SearchServer::ParseQuery(string_view text) const {
     Query result;
     for (string_view word : SplitIntoWordsSTRV(text)) {
-        const auto query_word = ParseQueryWord(string(word.begin(), word.end()));
+        const auto query_word = ParseQueryWord(word);
         if (!query_word.is_stop) {
             if (query_word.is_minus) {
                 result.minus_words.push_back(query_word.data);
@@ -250,7 +312,7 @@ SearchServer::Query SearchServer::ParseQuery(string_view text) const {
             }
         }
     }
-    auto remove_duplicates = [](vector<string>& words) {
+    auto remove_duplicates = [](vector<string_view>& words) {
         sort(words.begin(), words.end());
         auto it_last = unique(words.begin(), words.end());
         words.erase(it_last, words.end());
@@ -260,22 +322,22 @@ SearchServer::Query SearchServer::ParseQuery(string_view text) const {
     return result;
 }
 
-// SearchServer::Query SearchServer::ParseQueryPar(string_view text) const {
-//     Query result;
-//     for (string_view word : SplitIntoWordsSTRV(text)) {
-//         const auto query_word = ParseQueryWord(string(word.begin(), word.end()));
-//         if (!query_word.is_stop) {
-//             if (query_word.is_minus) {
-//                 result.minus_words.push_back(query_word.data);
-//             } else {
-//                 result.plus_words.push_back(query_word.data);
-//             }
-//         }
-//     }
-//     return result;
-// }
+SearchServer::Query SearchServer::ParseQueryPar(string_view text) const {
+    Query result;
+    for (string_view word : SplitIntoWordsSTRV(text)) {
+        const auto query_word = ParseQueryWord(word);
+        if (!query_word.is_stop) {
+            if (query_word.is_minus) {
+                result.minus_words.push_back(query_word.data);
+            } else {
+                result.plus_words.push_back(query_word.data);
+            }
+        }
+    }
+    return result;
+}
 
-double SearchServer::ComputeWordInverseDocumentFreq(const string& word) const {
+double SearchServer::ComputeWordInverseDocumentFreq(string_view word) const {
     return log(GetDocumentCount() * 1.0 / word_to_document_freqs_.at(word).size());
 }
 
@@ -299,17 +361,17 @@ void FindTopDocuments(const SearchServer& search_server, const string& raw_query
     }
 }
 
-// void MatchDocuments(const SearchServer& search_server, const string& query) {
-//     try {
-//         cout << "Matching for request: "s << query << endl;
-//         const int document_count = search_server.GetDocumentCount();
-//         auto document_id_it = search_server.begin();
-//         for (int index = 0; index < document_count; ++index) {
-//             const int document_id = *document_id_it++;
-//             const auto [words, status] = search_server.MatchDocument(query, document_id);
-//             PrintMatchDocumentResult(document_id, words, status);
-//         }
-//     } catch (const exception& e) {
-//         cout << "Error in matchig request "s << query << ": "s << e.what() << endl;
-//     }
-// }
+void MatchDocuments(const SearchServer& search_server, const string& query) {
+    try {
+        cout << "Matching for request: "s << query << endl;
+        const int document_count = search_server.GetDocumentCount();
+        auto document_id_it = search_server.begin();
+        for (int index = 0; index < document_count; ++index) {
+            const int document_id = *document_id_it++;
+            const auto [words, status] = search_server.MatchDocument(query, document_id);
+            PrintMatchDocumentResult(document_id, words, status);
+        }
+    } catch (const exception& e) {
+        cout << "Error in matchig request "s << query << ": "s << e.what() << endl;
+    }
+}
