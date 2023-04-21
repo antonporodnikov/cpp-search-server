@@ -14,15 +14,32 @@ SearchServer::SearchServer(string_view stop_words_text)
 {
 }
 
+// void SearchServer::AddDocument(int document_id, string_view document, DocumentStatus status,
+//                                const vector<int>& ratings) {
+//     if ((document_id < 0) || (documents_.count(document_id) > 0)) {
+//         throw std::invalid_argument("Invalid document_id"s);
+//     }
+//     document_to_words_[document_id] = SplitIntoWordsNoStop(string(document.begin(),
+//                                                            document.end()));
+//     const double inv_word_count = 1.0 / document_to_words_.at(document_id).size();
+//     for (const std::string& word : document_to_words_.at(document_id)) {
+//         word_to_document_freqs_[word][document_id] += inv_word_count;
+//         id_to_word_freqs_[document_id][word] += inv_word_count;
+//     }
+//     documents_.emplace(document_id, DocumentData{ComputeAverageRating(ratings), status});
+//     document_ids_.insert(document_id);
+// }
+
 void SearchServer::AddDocument(int document_id, string_view document, DocumentStatus status,
                                const vector<int>& ratings) {
     if ((document_id < 0) || (documents_.count(document_id) > 0)) {
         throw std::invalid_argument("Invalid document_id"s);
     }
-    document_to_words_[document_id] = SplitIntoWordsNoStop(string(document.begin(),
-                                                           document.end()));
-    const double inv_word_count = 1.0 / document_to_words_.at(document_id).size();
-    for (const std::string& word : document_to_words_.at(document_id)) {
+    // document_to_words_.emplace_back(document);
+    document_to_words_.emplace_back(document.begin(), document.end());
+    vector<string_view> words = SplitIntoWordsNoStop(document_to_words_.back());
+    const double inv_word_count = 1.0 / words.size();
+    for (string_view word : words) {
         word_to_document_freqs_[word][document_id] += inv_word_count;
         id_to_word_freqs_[document_id][word] += inv_word_count;
     }
@@ -146,12 +163,6 @@ void SearchServer::RemoveDocument(int document_id) {
         }
     }
     {
-        auto it = document_to_words_.find(document_id);
-        if (it != document_to_words_.end()) {
-            document_to_words_.erase(it);
-        }
-    }
-    {
         auto it = documents_.find(document_id);
         if (it != documents_.end()) {
             documents_.erase(it);
@@ -183,12 +194,6 @@ void SearchServer::RemoveDocument(const std::execution::parallel_policy& policy,
                  word_to_document_freqs_.at(word).erase(document_id);
              });
     {
-        auto it = document_to_words_.find(document_id);
-        if (it != document_to_words_.end()) {
-            document_to_words_.erase(it);
-        }
-    }
-    {
         auto it = documents_.find(document_id);
         if (it != documents_.end()) {
             documents_.erase(it);
@@ -201,16 +206,16 @@ void SearchServer::RemoveDocument(const std::execution::parallel_policy& policy,
     }
 }
 
-bool SearchServer::IsStopWord(const string& word) const {
-    return stop_words_.count(word) > 0;
-}
+// bool SearchServer::IsStopWord(const string& word) const {
+//     return stop_words_.count(word) > 0;
+// }
 
-bool SearchServer::IsValidWord(const string& word) {
-    // A valid word must not contain special characters
-    return none_of(word.begin(), word.end(), [](char c) {
-        return c >= '\0' && c < ' ';
-    });
-}
+// bool SearchServer::IsValidWord(const string& word) {
+//     // A valid word must not contain special characters
+//     return none_of(word.begin(), word.end(), [](char c) {
+//         return c >= '\0' && c < ' ';
+//     });
+// }
 
 bool SearchServer::IsStopWordSTRV(string_view word) const {
     return stop_words_.count(word) > 0;
@@ -224,13 +229,26 @@ bool SearchServer::IsValidWordSTRV(string_view word) {
     });
 }
 
-vector<string> SearchServer::SplitIntoWordsNoStop(const string& text) const {
-    vector<string> words;
-    for (const string& word : SplitIntoWords(text)) {
-        if (!IsValidWord(word)) {
-            throw invalid_argument("Word "s + word + " is invalid"s);
+// vector<string> SearchServer::SplitIntoWordsNoStop(const string& text) const {
+//     vector<string> words;
+//     for (const string& word : SplitIntoWords(text)) {
+//         if (!IsValidWordSTRV(word)) {
+//             throw invalid_argument("Word "s + word + " is invalid"s);
+//         }
+//         if (!IsStopWordSTRV(word)) {
+//             words.push_back(word);
+//         }
+//     }
+//     return words;
+// }
+
+vector<string_view> SearchServer::SplitIntoWordsNoStop(const string& text) const {
+    vector<string_view> words;
+    for (string_view word : SplitIntoWordsSTRV(text)) {
+        if (!IsValidWordSTRV(word)) {
+            throw invalid_argument("Word "s + string(word.begin(), word.end()) + " is invalid"s);
         }
-        if (!IsStopWord(word)) {
+        if (!IsStopWordSTRV(word)) {
             words.push_back(word);
         }
     }

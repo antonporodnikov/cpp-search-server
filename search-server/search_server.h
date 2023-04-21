@@ -1,6 +1,7 @@
 #pragma once
 #include <algorithm>
 #include <cmath>
+#include <deque>  //  test
 #include <execution>
 #include <map>
 #include <numeric>
@@ -71,21 +72,24 @@ private:
         DocumentStatus status;
     };
     const std::set<std::string, std::less<>> stop_words_;
-    std::map<int, std::vector<std::string>> document_to_words_;
+    // std::map<int, std::vector<std::string>> document_to_words_;
+    std::deque<std::string> document_to_words_;
     std::map<std::string_view, std::map<int, double>> word_to_document_freqs_;
     std::map<int, std::map<std::string_view, double>> id_to_word_freqs_;
     std::map<int, DocumentData> documents_;
     std::set<int> document_ids_;
 
-    bool IsStopWord(const std::string& word) const;
+    // bool IsStopWord(const std::string& word) const;
 
-    static bool IsValidWord(const std::string& word);
+    // static bool IsValidWord(const std::string& word);
 
     bool IsStopWordSTRV(std::string_view word) const;
 
     static bool IsValidWordSTRV(std::string_view word);
 
-    std::vector<std::string> SplitIntoWordsNoStop(const std::string& text) const;
+    // std::vector<std::string> SplitIntoWordsNoStop(const std::string& text) const;
+
+    std::vector<std::string_view> SplitIntoWordsNoStop(const std::string& text) const;
 
     static int ComputeAverageRating(const std::vector<int>& ratings);
 
@@ -118,7 +122,7 @@ template <typename StringContainer>
 SearchServer::SearchServer(const StringContainer& stop_words)
     : stop_words_(MakeUniqueNonEmptyStrings(stop_words))  // Extract non-empty stop words
     {
-        if (!all_of(stop_words_.begin(), stop_words_.end(), IsValidWord)) {
+        if (!all_of(stop_words_.begin(), stop_words_.end(), IsValidWordSTRV)) {
         throw std::invalid_argument("Some of stop words are invalid"s);
     }
 }
