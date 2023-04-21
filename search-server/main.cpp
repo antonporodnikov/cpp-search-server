@@ -64,7 +64,5 @@ int main() {
 
     cout << search_server.GetDocumentCount() << endl;
 
-    cout << "[ program finished successfully ]"s << endl;
-
     return 0;
 }

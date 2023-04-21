@@ -76,20 +76,6 @@ tuple<vector<string_view>, DocumentStatus> SearchServer::MatchDocument(string_vi
     )) {
         return {vector<string_view>{}, documents_.at(document_id).status};
     }
-    // vector<string_view> matched_words(query.plus_words.size());
-    // auto it_last = copy_if(
-    //     query.plus_words.begin(),
-    //     query.plus_words.end(),
-    //     matched_words.begin(),
-    //     [this, document_id](string_view plus_word) {
-    //         return word_to_document_freqs_.count(plus_word) != 0 &&
-    //         word_to_document_freqs_.at(plus_word).count(document_id);
-    //     }
-    // );
-    // sort(matched_words.begin(), it_last);
-    // auto it_last_new = unique(matched_words.begin(), it_last);
-    // matched_words.erase(it_last_new, matched_words.end());
-    // return {matched_words, documents_.at(document_id).status};
     vector<string_view> matched_words;
     for (string_view word : query.plus_words) {
         if (word_to_document_freqs_.count(word) == 0) {
@@ -99,15 +85,6 @@ tuple<vector<string_view>, DocumentStatus> SearchServer::MatchDocument(string_vi
             matched_words.push_back(word);
         }
     }
-    // for (string_view word : query.minus_words) {
-    //     if (word_to_document_freqs_.count(word) == 0) {
-    //         continue;
-    //     }
-    //     if (word_to_document_freqs_.at(word).count(document_id)) {
-    //         matched_words.clear();
-    //         break;
-    //     }
-    // }
     return {matched_words, documents_.at(document_id).status};
 }
 
@@ -153,7 +130,7 @@ tuple<vector<string_view>, DocumentStatus> SearchServer::MatchDocument(
     // matched_words.erase(it_last, matched_words.end());
     // return {matched_words, documents_.at(document_id).status};
     sort(policy, matched_words.begin(), it_last);
-    auto it_last_new = unique(matched_words.begin(), it_last);
+    auto it_last_new = unique(policy, matched_words.begin(), it_last);
     matched_words.erase(it_last_new, matched_words.end());
     return {matched_words, documents_.at(document_id).status};
 }
@@ -267,22 +244,6 @@ int SearchServer::ComputeAverageRating(const vector<int>& ratings) {
     int rating_sum = accumulate(ratings.begin(), ratings.end(), 0);
     return rating_sum / static_cast<int>(ratings.size());
 }
-
-// SearchServer::QueryWord SearchServer::ParseQueryWord(const string& text) const {
-//     if (text.empty()) {
-//         throw invalid_argument("Query word is empty"s);
-//     }
-//     string word = text;
-//     bool is_minus = false;
-//     if (word[0] == '-') {
-//         is_minus = true;
-//         word = word.substr(1);
-//     }
-//     if (word.empty() || word[0] == '-' || !IsValidWord(word)) {
-//         throw invalid_argument("Query word "s + text + " is invalid");
-//     }
-//     return {word, is_minus, IsStopWord(word)};
-// }
 
 SearchServer::QueryWord SearchServer::ParseQueryWord(string_view text) const {
     if (text.empty()) {

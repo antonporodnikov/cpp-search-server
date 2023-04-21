@@ -95,8 +95,6 @@ private:
         bool is_stop;
     };
 
-    // QueryWord ParseQueryWord(const std::string& text) const;
-
     QueryWord ParseQueryWord(std::string_view text) const;
 
     struct Query {
