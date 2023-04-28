@@ -109,13 +109,17 @@ void TestDocumentsMatching() {
     {
         SearchServer server("empty"s);
         server.AddDocument(doc_id, content, DocumentStatus::ACTUAL, ratings);
-        const auto matching_doc = server.MatchDocument("big cat and dog in the city"s, doc_id);
-        vector<string_view> content_words = SplitIntoWordsSTRV(content);
-        vector<string_view> matching_words = get<0>(matching_doc);
+        // const auto matching_doc = server.MatchDocument("big cat and dog in the city"s, doc_id);
+        vector<string> content_words = SplitIntoWords(content);
+        vector<string> matching_words;
+        for (string_view s : get<0>(server.MatchDocument("big cat and dog in the city", doc_id))) {
+            matching_words.push_back(string(s.begin(), s.end()));
+        }
         sort(content_words.begin(), content_words.end());
         sort(matching_words.begin(), matching_words.end());
         ASSERT_EQUAL(content_words, matching_words);
-        const DocumentStatus matching_doc_status = get<1>(matching_doc);
+        const DocumentStatus matching_doc_status = get<1>(
+            server.MatchDocument("big cat and dog in the city", doc_id));
         ASSERT_EQUAL(matching_doc_status, DocumentStatus::ACTUAL);
     }
     {
