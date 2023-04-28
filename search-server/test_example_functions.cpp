@@ -110,8 +110,8 @@ void TestDocumentsMatching() {
         SearchServer server("empty"s);
         server.AddDocument(doc_id, content, DocumentStatus::ACTUAL, ratings);
         const auto matching_doc = server.MatchDocument("big cat and dog in the city"s, doc_id);
-        vector<string> content_words = SplitIntoWords(content);
-        vector<string> matching_words = get<0>(matching_doc);
+        vector<string_view> content_words = SplitIntoWordsSTRV(content);
+        vector<string_view> matching_words = get<0>(matching_doc);
         sort(content_words.begin(), content_words.end());
         sort(matching_words.begin(), matching_words.end());
         ASSERT_EQUAL(content_words, matching_words);
@@ -122,7 +122,7 @@ void TestDocumentsMatching() {
         SearchServer server("empty"s);
         server.AddDocument(doc_id, content, DocumentStatus::ACTUAL, ratings);
         const auto matching_doc = server.MatchDocument("big dog in the city -cat"s, doc_id);
-        const vector<string> matching_words = get<0>(matching_doc);
+        const vector<string_view> matching_words = get<0>(matching_doc);
         ASSERT_HINT(matching_words.empty(),
                     "There is a match for minus-word, vector matching_words should be empty"s);
     }

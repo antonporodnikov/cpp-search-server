@@ -3,20 +3,17 @@
 #include "paginator.h"
 #include "process_queries.h"
 #include "read_input_functions.h"
-// #include "remove_duplicates.h"
 #include "request_queue.h"
 #include "search_server.h"
 #include "string_processing.h"
-// #include "test_example_functions.h"
+#include "test_example_functions.h"
 
 using namespace std;
 
 int main() {
-    // TestSearchServer();
-    // // Если вы видите эту строку, значит все тесты прошли успешно
-    // cout << "Search server testing finished"s << endl;
-
-    // SearchServer search_server("and with"s);
+    TestSearchServer();
+    // Если вы видите эту строку, значит все тесты прошли успешно
+    cout << "Search server testing finished"s << endl;
 
     string_view stop_words = "and with";
     SearchServer search_server(stop_words);
@@ -57,12 +54,6 @@ int main() {
         cout << words.size() << " words for document 3"s << endl;
         // 0 words for document 3
     }
-
-    cout << search_server.GetDocumentCount() << endl;
-
-    search_server.RemoveDocument(execution::par, 2);
-
-    cout << search_server.GetDocumentCount() << endl;
 
     return 0;
 }
