@@ -14,28 +14,11 @@ SearchServer::SearchServer(string_view stop_words_text)
 {
 }
 
-// void SearchServer::AddDocument(int document_id, string_view document, DocumentStatus status,
-//                                const vector<int>& ratings) {
-//     if ((document_id < 0) || (documents_.count(document_id) > 0)) {
-//         throw std::invalid_argument("Invalid document_id"s);
-//     }
-//     document_to_words_[document_id] = SplitIntoWordsNoStop(string(document.begin(),
-//                                                            document.end()));
-//     const double inv_word_count = 1.0 / document_to_words_.at(document_id).size();
-//     for (const std::string& word : document_to_words_.at(document_id)) {
-//         word_to_document_freqs_[word][document_id] += inv_word_count;
-//         id_to_word_freqs_[document_id][word] += inv_word_count;
-//     }
-//     documents_.emplace(document_id, DocumentData{ComputeAverageRating(ratings), status});
-//     document_ids_.insert(document_id);
-// }
-
 void SearchServer::AddDocument(int document_id, string_view document, DocumentStatus status,
                                const vector<int>& ratings) {
     if ((document_id < 0) || (documents_.count(document_id) > 0)) {
         throw std::invalid_argument("Invalid document_id"s);
     }
-    // document_to_words_.emplace_back(document);
     document_to_words_.emplace_back(document.begin(), document.end());
     vector<string_view> words = SplitIntoWordsNoStop(document_to_words_.back());
     const double inv_word_count = 1.0 / words.size();
@@ -141,11 +124,6 @@ tuple<vector<string_view>, DocumentStatus> SearchServer::MatchDocument(
             word_to_document_freqs_.at(plus_word).count(document_id);
         }
     );
-    // matched_words.erase(it_last, matched_words.end());
-    // sort(policy, matched_words.begin(), matched_words.end());
-    // it_last = unique(matched_words.begin(), matched_words.end());
-    // matched_words.erase(it_last, matched_words.end());
-    // return {matched_words, documents_.at(document_id).status};
     sort(policy, matched_words.begin(), it_last);
     auto it_last_new = unique(policy, matched_words.begin(), it_last);
     matched_words.erase(it_last_new, matched_words.end());
@@ -206,22 +184,11 @@ void SearchServer::RemoveDocument(const std::execution::parallel_policy& policy,
     }
 }
 
-// bool SearchServer::IsStopWord(const string& word) const {
-//     return stop_words_.count(word) > 0;
-// }
-
-// bool SearchServer::IsValidWord(const string& word) {
-//     // A valid word must not contain special characters
-//     return none_of(word.begin(), word.end(), [](char c) {
-//         return c >= '\0' && c < ' ';
-//     });
-// }
-
-bool SearchServer::IsStopWordSTRV(string_view word) const {
+bool SearchServer::IsStopWord(string_view word) const {
     return stop_words_.count(word) > 0;
 }
 
-bool SearchServer::IsValidWordSTRV(string_view word) {
+bool SearchServer::IsValidWord(string_view word) {
     // A valid word must not contain special characters
     string word_str(word.begin(), word.end());
     return none_of(word_str.begin(), word_str.end(), [](char c) {
@@ -229,26 +196,13 @@ bool SearchServer::IsValidWordSTRV(string_view word) {
     });
 }
 
-// vector<string> SearchServer::SplitIntoWordsNoStop(const string& text) const {
-//     vector<string> words;
-//     for (const string& word : SplitIntoWords(text)) {
-//         if (!IsValidWordSTRV(word)) {
-//             throw invalid_argument("Word "s + word + " is invalid"s);
-//         }
-//         if (!IsStopWordSTRV(word)) {
-//             words.push_back(word);
-//         }
-//     }
-//     return words;
-// }
-
 vector<string_view> SearchServer::SplitIntoWordsNoStop(const string& text) const {
     vector<string_view> words;
     for (string_view word : SplitIntoWordsSTRV(text)) {
-        if (!IsValidWordSTRV(word)) {
+        if (!IsValidWord(word)) {
             throw invalid_argument("Word "s + string(word.begin(), word.end()) + " is invalid"s);
         }
-        if (!IsStopWordSTRV(word)) {
+        if (!IsStopWord(word)) {
             words.push_back(word);
         }
     }
@@ -273,10 +227,10 @@ SearchServer::QueryWord SearchServer::ParseQueryWord(string_view text) const {
         is_minus = true;
         word = word.substr(1);
     }
-    if (word.empty() || word[0] == '-' || !IsValidWordSTRV(word)) {
+    if (word.empty() || word[0] == '-' || !IsValidWord(word)) {
         throw invalid_argument("Query word "s + string(text.begin(), text.end()) + " is invalid");
     }
-    return {word, is_minus, IsStopWordSTRV(word)};
+    return {word, is_minus, IsStopWord(word)};
 }
 
 SearchServer::Query SearchServer::ParseQuery(string_view text) const {
