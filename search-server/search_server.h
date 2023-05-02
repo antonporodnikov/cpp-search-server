@@ -16,7 +16,7 @@ using namespace std::string_literals;
 
 const int MAX_RESULT_DOCUMENT_COUNT = 5;
 const double EPSILON = 1e-6;
-const int CONCURRENT_MAP_BUCKETS_AMOUNT = 16;
+const int CONCURRENT_MAP_BUCKETS_AMOUNT = 32;
 
 class SearchServer {
 public:
