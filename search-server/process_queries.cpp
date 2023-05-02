@@ -11,8 +11,8 @@ vector<vector<Document>> ProcessQueries(
                       return search_server.FindTopDocuments(query);
                   });
         
-        return result;
-    }
+    return result;
+}
 
 list<Document> ProcessQueriesJoined(
     const SearchServer& search_server,
@@ -24,4 +24,4 @@ list<Document> ProcessQueriesJoined(
         }
 
         return result;
-    }
+}
