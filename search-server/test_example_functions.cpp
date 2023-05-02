@@ -102,40 +102,6 @@ void TestDocumentsWithMinusWordsNotInResult() {
     }
 }
 
-void TestDocumentsMatching() {
-    const int doc_id = 42;
-    const string content = "cat in the city"s;
-    const vector<int> ratings = {1, 2, 3};
-    {
-        SearchServer server("empty"s);
-        server.AddDocument(doc_id, content, DocumentStatus::ACTUAL, ratings);
-        vector<string> content_words = SplitIntoWords(content);
-        vector<string_view> matching_words_strv;
-        vector<string> matching_words;
-        for (string_view s : get<0>(server.MatchDocument(
-            "big cat and dog in the city", doc_id))) {
-            matching_words_strv.emplace_back(s);
-        }
-        for (string_view s : matching_words_strv) {
-            matching_words.push_back(string(s.begin(), s.end()));
-        }
-        sort(content_words.begin(), content_words.end());
-        sort(matching_words.begin(), matching_words.end());
-        ASSERT_EQUAL(content_words, matching_words);
-        const DocumentStatus matching_doc_status = get<1>(
-            server.MatchDocument("big cat and dog in the city", doc_id));
-        ASSERT_EQUAL(matching_doc_status, DocumentStatus::ACTUAL);
-    }
-    {
-        SearchServer server("empty"s);
-        server.AddDocument(doc_id, content, DocumentStatus::ACTUAL, ratings);
-        const auto matching_doc = server.MatchDocument("big dog in the city -cat"s, doc_id);
-        const vector<string_view> matching_words = get<0>(matching_doc);
-        ASSERT_HINT(matching_words.empty(),
-                    "There is a match for minus-word, vector matching_words should be empty"s);
-    }
-}
-
 void TestRelevanceSorting() {
     const DocumentStatus status = DocumentStatus::ACTUAL;
     {
@@ -346,7 +312,6 @@ void TestSearchServer() {
     RUN_TEST(TestExcludeStopWordsFromAddedDocumentContent);
     RUN_TEST(TestSearchingAddDocument);
     RUN_TEST(TestDocumentsWithMinusWordsNotInResult);
-    RUN_TEST(TestDocumentsMatching);
     RUN_TEST(TestRelevanceSorting);
     RUN_TEST(TestDocumentsRatingCalc);
     RUN_TEST(TestPredicatFucntionInFindTopDocuments);

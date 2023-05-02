@@ -1,5 +1,4 @@
 #include "document.h"
-#include "log_duration.h"
 #include "paginator.h"
 #include "process_queries.h"
 #include "read_input_functions.h"
@@ -35,58 +34,18 @@ int main() {
         search_server.AddDocument(++id, text, DocumentStatus::ACTUAL, {1, 2});
     }
     cout << "ACTUAL by default:"s << endl;
+    // последовательная версия
     for (const Document& document : search_server.FindTopDocuments("curly nasty cat"s)) {
         PrintDocument(document);
     }
-
-    // cout << "ACTUAL by default:"s << endl;
-    // for (const Document& document : search_server.FindTopDocuments(
-    //     execution::seq, "curly nasty cat"s)) {
-    //     PrintDocument(document);
-    // }
-
-    // cout << "ACTUAL by default:"s << endl;
-    // for (const Document& document : search_server.FindTopDocuments(
-    //     execution::par, "curly nasty cat"s)) {
-    //     PrintDocument(document);
-    // }
-
-    // cout << "BANNED:"s << endl;
-    // for (const Document& document : search_server.FindTopDocuments(
-    //     "curly nasty cat"s, DocumentStatus::ACTUAL)) {
-    //     PrintDocument(document);
-    // }
-
     cout << "BANNED:"s << endl;
-    for (const Document& document : search_server.FindTopDocuments(
-        execution::seq, "curly nasty cat"s, DocumentStatus::BANNED)) {
+    // последовательная версия
+    for (const Document& document : search_server.FindTopDocuments(execution::seq, "curly nasty cat"s, DocumentStatus::BANNED)) {
         PrintDocument(document);
     }
-
-    // cout << "BANNED:"s << endl;
-    // for (const Document& document : search_server.FindTopDocuments(
-    //     execution::par, "curly nasty cat"s, DocumentStatus::ACTUAL)) {
-    //     PrintDocument(document);
-    // }
-
-    // cout << "Even ids:"s << endl;
-    // for (const Document& document : search_server.FindTopDocuments("curly nasty cat"s,
-    //     [](int document_id, DocumentStatus status, int rating)
-    //     { return document_id % 2 == 0; })) {
-    //     PrintDocument(document);
-    // }
-    
-    // cout << "Even ids:"s << endl;
-    // for (const Document& document : search_server.FindTopDocuments(execution::seq,
-    //     "curly nasty cat"s, [](int document_id, DocumentStatus status, int rating)
-    //     { return document_id % 2 == 0; })) {
-    //     PrintDocument(document);
-    // }
-
     cout << "Even ids:"s << endl;
-    for (const Document& document : search_server.FindTopDocuments(execution::par,
-        "curly nasty cat"s, [](int document_id, DocumentStatus status, int rating)
-        { return document_id % 2 == 0; })) {
+    // параллельная версия
+    for (const Document& document : search_server.FindTopDocuments(execution::par, "curly nasty cat"s, [](int document_id, DocumentStatus status, int rating) { return document_id % 2 == 0; })) {
         PrintDocument(document);
     }
 

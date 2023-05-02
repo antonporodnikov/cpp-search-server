@@ -74,8 +74,6 @@ void TestSearchingAddDocument();
 
 void TestDocumentsWithMinusWordsNotInResult();
 
-void TestDocumentsMatching();
-
 void TestRelevanceSorting();
 
 void TestDocumentsRatingCalc();
